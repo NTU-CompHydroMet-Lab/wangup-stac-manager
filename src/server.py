@@ -21,5 +21,11 @@ app.mount("/", StaticFiles(directory=browser_dist, html=True), name="ui")
 
 if __name__ == "__main__":
     import uvicorn
+    import sys
+    
+    # Add project root to sys.path so 'src.server' can be resolved
+    # This is needed when running 'python src/server.py' directly
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    
     # Run the FastAPI app; host 0.0.0.0 makes it reachable from Docker or other hosts
     uvicorn.run("src.server:app", host="0.0.0.0", port=8001, reload=True)
