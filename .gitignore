@@ -24,3 +24,6 @@ yarn-error.log*
 
 # Optional: Ignore large generated outputs if desired, but keeping for demo
 # stac_output/
+
+# Documentation
+PRD.md
