@@ -1,0 +1,35 @@
+{
+  "type": "Catalog",
+  "id": "era5-catalog",
+  "stac_version": "1.0.0",
+  "description": "Catalog for era5 datasets",
+  "links": [
+    {
+      "rel": "root",
+      "href": "./catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "./catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "./era5_catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "child",
+      "href": "./era5_global_cj/collection.json",
+      "type": "application/json",
+      "title": "Generated STAC collection (static) via intake\u2011xarray"
+    },
+    {
+      "rel": "child",
+      "href": "./era5_east_asia/collection.json",
+      "type": "application/json",
+      "title": "Generated STAC collection (static) via intake\u2011xarray"
+    }
+  ]
+}

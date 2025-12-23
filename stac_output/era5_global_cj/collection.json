@@ -1,0 +1,97 @@
+{
+  "type": "Collection",
+  "id": "era5_global_cj",
+  "stac_version": "1.0.0",
+  "description": "Generated STAC collection (static) via intake\u2011xarray",
+  "license": "CC-BY-4.0",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          0.0,
+          -60.0,
+          359.75,
+          60.0
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2017-01-01T00:00:00.000000000",
+          "2024-12-31T23:00:00.000000000"
+        ]
+      ]
+    }
+  },
+  "summaries": {
+    "gsd": [
+      1300
+    ],
+    "processing:level": [
+      "bronze",
+      "silver",
+      "gold"
+    ],
+    "platform": [
+      "unknown"
+    ]
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_global_cj-2017.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_global_cj-2018.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_global_cj-2019.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_global_cj-2020.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_global_cj-2021.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_global_cj-2022.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_global_cj-2023.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_global_cj-2024.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "../era5_catalog.json",
+      "type": "application/json"
+    }
+  ]
+}

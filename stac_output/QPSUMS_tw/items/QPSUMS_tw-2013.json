@@ -1,0 +1,54 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "id": "QPSUMS_tw-2013",
+  "collection": "QPSUMS_tw",
+  "geometry": null,
+  "bbox": [
+    118.0,
+    20.0,
+    123.5,
+    27.0
+  ],
+  "properties": {
+    "start_datetime": "2013-01-01T00:00:00Z",
+    "end_datetime": "2013-12-31T23:50:00Z",
+    "gsd": 1387.5,
+    "platform": "unknown",
+    "variables": [
+      "MaxDBZ"
+    ]
+  },
+  "assets": {
+    "zarr": {
+      "href": "/NAS/dataset/era5_rechunked/era5_2013_10N40N_100E140E_rechunked.zarr",
+      "type": "application/vnd+zarr",
+      "roles": [
+        "data"
+      ],
+      "title": "ERA5 2013 Zarr Store"
+    }
+  },
+  "links": [
+    {
+      "rel": "root",
+      "href": "../collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "collection",
+      "href": "../collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "./QPSUMS_tw-2013.json",
+      "type": "application/json"
+    }
+  ]
+}

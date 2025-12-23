@@ -1,0 +1,70 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "id": "era5_east_asia-2019",
+  "collection": "era5_east_asia",
+  "geometry": null,
+  "bbox": [
+    100.0,
+    10.0,
+    140.0,
+    40.0
+  ],
+  "properties": {
+    "start_datetime": "2019-01-01T00:00:00Z",
+    "end_datetime": "2019-12-31T23:00:00Z",
+    "gsd": 27750.0,
+    "platform": "unknown",
+    "variables": [
+      "100m_u_component_of_wind",
+      "100m_v_component_of_wind",
+      "10m_u_component_of_wind",
+      "10m_v_component_of_wind",
+      "boundary_layer_height",
+      "convective_available_potential_energy",
+      "convective_inhibition",
+      "geopotential",
+      "instantaneous_10m_wind_gust",
+      "k_index",
+      "sea_surface_temperature",
+      "specific_humidity",
+      "surface_pressure",
+      "temperature",
+      "total_precipitation",
+      "u_component_of_wind",
+      "v_component_of_wind"
+    ]
+  },
+  "assets": {
+    "zarr": {
+      "href": "/NAS/dataset/era5_rechunked/era5_2019_10N40N_100E140E_rechunked.zarr",
+      "type": "application/vnd+zarr",
+      "roles": [
+        "data"
+      ],
+      "title": "ERA5 2019 Zarr Store"
+    }
+  },
+  "links": [
+    {
+      "rel": "root",
+      "href": "../collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "collection",
+      "href": "../collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "./era5_east_asia-2019.json",
+      "type": "application/json"
+    }
+  ]
+}

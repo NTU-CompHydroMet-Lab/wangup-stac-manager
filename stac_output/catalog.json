@@ -1,0 +1,30 @@
+{
+  "type": "Catalog",
+  "id": "stac-root-catalog",
+  "stac_version": "1.0.0",
+  "description": "Root Catalog for Research Lab Data",
+  "links": [
+    {
+      "rel": "root",
+      "href": "./catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "./catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "child",
+      "href": "./radar_catalog.json",
+      "type": "application/json",
+      "title": "radar Data"
+    },
+    {
+      "rel": "child",
+      "href": "./era5_catalog.json",
+      "type": "application/json",
+      "title": "era5 Data"
+    }
+  ]
+}

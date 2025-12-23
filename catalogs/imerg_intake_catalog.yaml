@@ -1,0 +1,31 @@
+metadata:
+  version: 1
+  description: "IMERG Precipitation Data Catalog"
+
+sources:
+  imerg_bronze:
+    description: "IMERG v07 Early/Late/Final (Bronze)"
+    driver: netcdf
+    args:
+      urlpath: "/home/NAS/data/_Bronze/IMERG_v07/Final/Level/*/*.HDF5"
+      # Note: HDF5 often requires netcdf4 driver or specific hdf5 driver. 
+      # Intake-xarray can open HDF5 via xarray if netcdf4/h5netcdf is installed.
+    metadata:
+      tier: "bronze"
+      source: "NASA"
+      platform: "GPM"
+      gsd: 10000 # Approx 0.1 deg
+
+  imerg_silver:
+    description: "IMERG v07 Final (Silver)"
+    driver: zarr
+    args:
+      urlpath: "/home/N/h/isaac-10009/Data/_silver_data/IMERG_V07/Final/Final/*.zarr"
+      consolidated: true
+    metadata:
+      tier: "silver"
+      source: "NASA"
+      platform: "GPM"
+      gsd: 10000
+      processing_level: "analysis_ready"
+      coordinate_system: "WGS84"

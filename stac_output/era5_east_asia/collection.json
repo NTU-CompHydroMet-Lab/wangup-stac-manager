@@ -1,0 +1,82 @@
+{
+  "type": "Collection",
+  "id": "era5_east_asia",
+  "stac_version": "1.0.0",
+  "description": "Generated STAC collection (static) via intake\u2011xarray",
+  "license": "CC-BY-4.0",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          100.0,
+          10.0,
+          140.0,
+          40.0
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2019-01-01T00:00:00.000000000",
+          "2023-12-31T23:00:00.000000000"
+        ]
+      ]
+    }
+  },
+  "summaries": {
+    "gsd": [
+      1300
+    ],
+    "processing:level": [
+      "bronze",
+      "silver",
+      "gold"
+    ],
+    "platform": [
+      "unknown"
+    ]
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_east_asia-2019.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_east_asia-2020.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_east_asia-2021.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_east_asia-2022.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/era5_east_asia-2023.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "../era5_catalog.json",
+      "type": "application/json"
+    }
+  ]
+}

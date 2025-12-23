@@ -1,0 +1,114 @@
+# ==============================================================================
+# INTAKE CATALOG: ERA5 GLOBAL + EAST ASIA REANALYSIS
+# ==============================================================================
+metadata:
+  version: 1
+  catalog_type: "era5_reanalysis"
+  institution: "Local Research Institute"
+  license: "Copernicus Climate Change Service (C3S)"
+  citation: |
+    Carver, Robert W, and Merose, Alex. (2023):
+    ARCO-ERA5: An Analysis-Ready Cloud-Optimized Reanalysis Dataset.
+    22nd Conf. on AI for Env. Science, Denver, CO, Amer. Meteo. Soc, 4A.1,
+    https://ams.confex.com/ams/103ANNUAL/meetingapp.cgi/Paper/415842
+  references:
+    - "https://github.com/google-research/arco-era5"
+    - "https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels"
+    - "https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels"
+
+sources:
+  # ============================================================================
+  # East Asia Rechunked (Recommended)
+  # ============================================================================
+  era5_east_asia:
+    description: |
+      ERA5 convection and storm variables (2019-2023)
+      Spatial: 10°N-40°N, 100°E-140°E (East Asia)
+      Temporal: 2019-2023 (5 years, hourly)
+      Resolution: 0.25° x 0.25°
+      Optimized chunks: 15-day intervals
+      ⚡ RECOMMENDED: Use this for analysis
+
+    driver: intake_xarray.xzarr.ZarrSource
+
+    args:
+      urlpath:
+        - '/home/sungche/NAS/dataset/era5_rechunked/era5_2019_10N40N_100E140E_rechunked.zarr'
+        - '/home/sungche/NAS/dataset/era5_rechunked/era5_2020_10N40N_100E140E_rechunked.zarr'
+        - '/home/sungche/NAS/dataset/era5_rechunked/era5_2021_10N40N_100E140E_rechunked.zarr'
+        - '/home/sungche/NAS/dataset/era5_rechunked/era5_2022_10N40N_100E140E_rechunked.zarr'
+        - '/home/sungche/NAS/dataset/era5_rechunked/era5_2023_10N40N_100E140E_rechunked.zarr'
+
+      combine: "nested"
+      concat_dim: "time"
+      consolidated: true
+
+      chunks:
+        time: 360
+        level: 4
+        latitude: 121
+        longitude: 161
+
+    metadata:
+      tags: ["era5", "reanalysis", "east-asia", "convection", "hourly"]
+      data_type: "gridded"
+      domain: "atmospheric"
+      grid_type: "equiangular_lat_lon"
+      institution: "ECMWF"
+      source: "ERA5 Reanalysis"
+      processing_level: "analysis_ready"
+      coordinate_system: "WGS84"
+
+  # ============================================================================
+  # Global Original (Raw, Non-Rechunked)
+  # ============================================================================
+  era5_global_cj:
+    description: |
+      ERA5 original global subset from CJ download (2017-2024)
+      Spatial: 60°S-60°N, 0°-359.75°E
+      Temporal: 2017-2024 (hourly)
+      Resolution: 0.25° x 0.25°
+      ⚠️ Not optimized, high memory and I/O cost
+
+    driver: intake_xarray.xzarr.ZarrSource
+
+    args:
+      urlpath:
+        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2017_0p25deg_chunk.zarr'
+        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2018_0p25deg_chunk.zarr'
+        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2019_0p25deg_chunk.zarr'
+        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2020_0p25deg_chunk.zarr'
+        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2021_0p25deg_chunk.zarr'
+        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2022_0p25deg_chunk.zarr'
+        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2023_0p25deg_chunk.zarr'
+        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2024_0p25deg_chunk.zarr'
+
+      combine: "nested"
+      concat_dim: "time"
+      consolidated: false  # Not optimized
+
+      chunks:
+        time: 1       # original chunking
+        level: 4
+        latitude: 481
+        longitude: 1440
+
+    metadata:
+      tags: ["era5", "reanalysis", "global", "convection", "hourly"]
+      data_type: "gridded"
+      domain: "atmospheric"
+      grid_type: "equiangular_lat_lon"
+      institution: "ECMWF"
+      source: "ERA5 Reanalysis"
+      processing_level: "raw"
+      coordinate_system: "WGS84"
+      spatial_domain: "Global subset (60S-60N)"
+      latitude_range: [-60, 60]
+      longitude_range: [0, 359.75]
+      temporal_coverage: 2017-2024
+      temporal_resolution: hourly
+
+      usage_notes:
+        - Not optimized for direct analysis
+        - High memory footprint
+        - Recommended: rechunk or subset before analysis
