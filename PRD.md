@@ -18,10 +18,8 @@ Here is the consolidated PRD (Version 1.2). I have integrated the **Intake → S
 * **Data Processing**:
 * DB/CSV: `duckdb` (OLAP Engine)
 * Array: `xarray`, `zarr`, `netcdf4`
-* Metadata: `pystac`, `stactools`, `intake`
-
-
-* **Backend**: `stac-fastapi-pgstac` (Docker)
+* **Metadata**: `pystac`, `stactools`, `intake`
+* **Server**: Static File Server (FastAPI) + STAC Browser
 
 ---
 
@@ -93,11 +91,9 @@ Agents must implement adapters inheriting from `BaseAdapter`, following the Mapp
 
 ---
 
-### 2.4 Database Backend (Docker)
-
-* `docker-compose.yml` includes:
-* `pgstac` (Database)
-* `stac-fastapi` (API Service, Port 8080)
+### 2.4 Static Server
+* `src/server.py`: FastAPI application serving static STAC JSON and STAC Browser.
+* **Port**: 8001
 
 
 
@@ -108,17 +104,17 @@ Agents must implement adapters inheriting from `BaseAdapter`, following the Mapp
 ```bash
 # 1. Environment Init
 uv init
-uv add typer pystac pystac-client xarray zarr netcdf4 duckdb rich requests intake
+uv add typer pystac pystac-client xarray zarr netcdf4 duckdb rich requests intake fastapi uvicorn
 
-# 2. Start Backend
-docker-compose up -d
+# 2. Generate STAC Catalog
+# Generate all sources from all catalogs
+python scripts/generate_stac.py --source all --catalog catalogs
 
-# 3. Initialize Collections (Define structure)
-uv run src/main.py init-db
+# 3. Generate Root Catalog (Hierarchy)
+python scripts/generate_root_catalog.py
 
-# 4. Execute Sync (Test Logic)
-uv run src/main.py sync --dataset all
-
+# 4. Start Static Server
+python src/server.py
 ```
 
 ---
