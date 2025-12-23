@@ -18,26 +18,27 @@
     "temporal": {
       "interval": [
         [
-          "2019-01-01T00:00:00.000000000",
-          "2023-12-31T23:00:00.000000000"
+          "2019-01-01T00:00:00Z",
+          "2023-12-31T23:00:00Z"
         ]
       ]
     }
   },
   "summaries": {
-    "gsd": [
-      1300
-    ],
     "processing:level": [
       "bronze",
-      "silver",
-      "gold"
+      "silver"
     ],
     "platform": [
       "unknown"
     ]
   },
   "links": [
+    {
+      "rel": "root",
+      "href": "./collection.json",
+      "type": "application/json"
+    },
     {
       "rel": "self",
       "href": "./collection.json",
@@ -67,16 +68,489 @@
       "rel": "item",
       "href": "./items/era5_east_asia-2023.json",
       "type": "application/json"
-    },
-    {
-      "rel": "root",
-      "href": "../catalog.json",
-      "type": "application/json"
-    },
-    {
-      "rel": "parent",
-      "href": "../era5_catalog.json",
-      "type": "application/json"
     }
-  ]
+  ],
+  "stac_extensions": [
+    "https://stac-extensions.github.io/datacube/v2.2.0/schema.json"
+  ],
+  "cube:dimensions": {
+    "time": {
+      "extent": [
+        "2019-01-01T00:00:00Z",
+        "2023-12-31T23:00:00Z"
+      ],
+      "step": "P0DT1H0M0S",
+      "type": "temporal"
+    },
+    "longitude": {
+      "axis": "x",
+      "extent": [
+        100.0,
+        140.0
+      ],
+      "step": 0.25,
+      "description": "longitude",
+      "reference_system": "EPSG:4326",
+      "type": "spatial"
+    },
+    "latitude": {
+      "axis": "y",
+      "extent": [
+        10.0,
+        40.0
+      ],
+      "step": -0.25,
+      "description": "latitude",
+      "reference_system": "EPSG:4326",
+      "type": "spatial"
+    }
+  },
+  "cube:variables": {
+    "100m_u_component_of_wind": {
+      "type": "data",
+      "description": "100 metre U wind component",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "m s**-1",
+      "attrs": {
+        "long_name": "100 metre U wind component",
+        "short_name": "u100",
+        "units": "m s**-1"
+      },
+      "shape": [
+        43824,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        121,
+        161
+      ]
+    },
+    "100m_v_component_of_wind": {
+      "type": "data",
+      "description": "100 metre V wind component",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "m s**-1",
+      "attrs": {
+        "long_name": "100 metre V wind component",
+        "short_name": "v100",
+        "units": "m s**-1"
+      },
+      "shape": [
+        43824,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        121,
+        161
+      ]
+    },
+    "10m_u_component_of_wind": {
+      "type": "data",
+      "description": "10 metre U wind component",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "m s**-1",
+      "attrs": {
+        "long_name": "10 metre U wind component",
+        "short_name": "u10",
+        "units": "m s**-1"
+      },
+      "shape": [
+        43824,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        121,
+        161
+      ]
+    },
+    "10m_v_component_of_wind": {
+      "type": "data",
+      "description": "10 metre V wind component",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "m s**-1",
+      "attrs": {
+        "long_name": "10 metre V wind component",
+        "short_name": "v10",
+        "units": "m s**-1"
+      },
+      "shape": [
+        43824,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        121,
+        161
+      ]
+    },
+    "boundary_layer_height": {
+      "type": "data",
+      "description": "Boundary layer height",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "m",
+      "attrs": {
+        "long_name": "Boundary layer height",
+        "short_name": "blh",
+        "units": "m"
+      },
+      "shape": [
+        43824,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        121,
+        161
+      ]
+    },
+    "convective_available_potential_energy": {
+      "type": "data",
+      "description": "Convective available potential energy",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "J kg**-1",
+      "attrs": {
+        "long_name": "Convective available potential energy",
+        "short_name": "cape",
+        "units": "J kg**-1"
+      },
+      "shape": [
+        43824,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        121,
+        161
+      ]
+    },
+    "convective_inhibition": {
+      "type": "data",
+      "description": "Convective inhibition",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "J kg**-1",
+      "attrs": {
+        "long_name": "Convective inhibition",
+        "short_name": "cin",
+        "units": "J kg**-1"
+      },
+      "shape": [
+        43824,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        121,
+        161
+      ]
+    },
+    "geopotential": {
+      "type": "data",
+      "description": "Geopotential",
+      "dimensions": [
+        "time",
+        "level",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "m**2 s**-2",
+      "attrs": {
+        "long_name": "Geopotential",
+        "short_name": "z",
+        "standard_name": "geopotential",
+        "units": "m**2 s**-2"
+      },
+      "shape": [
+        43824,
+        4,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        4,
+        121,
+        161
+      ]
+    },
+    "instantaneous_10m_wind_gust": {
+      "type": "data",
+      "description": "Instantaneous 10 metre wind gust",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "m s**-1",
+      "attrs": {
+        "long_name": "Instantaneous 10 metre wind gust",
+        "short_name": "i10fg",
+        "units": "m s**-1"
+      },
+      "shape": [
+        43824,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        121,
+        161
+      ]
+    },
+    "k_index": {
+      "type": "data",
+      "description": "K index",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "K",
+      "attrs": {
+        "long_name": "K index",
+        "short_name": "kx",
+        "units": "K"
+      },
+      "shape": [
+        43824,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        121,
+        161
+      ]
+    },
+    "sea_surface_temperature": {
+      "type": "data",
+      "description": "Sea surface temperature",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "K",
+      "attrs": {
+        "long_name": "Sea surface temperature",
+        "short_name": "sst",
+        "units": "K"
+      },
+      "shape": [
+        43824,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        121,
+        161
+      ]
+    },
+    "specific_humidity": {
+      "type": "data",
+      "description": "Specific humidity",
+      "dimensions": [
+        "time",
+        "level",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "kg kg**-1",
+      "attrs": {
+        "long_name": "Specific humidity",
+        "short_name": "q",
+        "standard_name": "specific_humidity",
+        "units": "kg kg**-1"
+      },
+      "shape": [
+        43824,
+        4,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        4,
+        121,
+        161
+      ]
+    },
+    "surface_pressure": {
+      "type": "data",
+      "description": "Surface pressure",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "Pa",
+      "attrs": {
+        "long_name": "Surface pressure",
+        "short_name": "sp",
+        "standard_name": "surface_air_pressure",
+        "units": "Pa"
+      },
+      "shape": [
+        43824,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        121,
+        161
+      ]
+    },
+    "temperature": {
+      "type": "data",
+      "description": "Temperature",
+      "dimensions": [
+        "time",
+        "level",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "K",
+      "attrs": {
+        "long_name": "Temperature",
+        "short_name": "t",
+        "standard_name": "air_temperature",
+        "units": "K"
+      },
+      "shape": [
+        43824,
+        4,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        4,
+        121,
+        161
+      ]
+    },
+    "total_precipitation": {
+      "type": "data",
+      "description": "Total precipitation",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "m",
+      "attrs": {
+        "long_name": "Total precipitation",
+        "short_name": "tp",
+        "units": "m"
+      },
+      "shape": [
+        43824,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        121,
+        161
+      ]
+    },
+    "u_component_of_wind": {
+      "type": "data",
+      "description": "U component of wind",
+      "dimensions": [
+        "time",
+        "level",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "m s**-1",
+      "attrs": {
+        "long_name": "U component of wind",
+        "short_name": "u",
+        "standard_name": "eastward_wind",
+        "units": "m s**-1"
+      },
+      "shape": [
+        43824,
+        4,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        4,
+        121,
+        161
+      ]
+    },
+    "v_component_of_wind": {
+      "type": "data",
+      "description": "V component of wind",
+      "dimensions": [
+        "time",
+        "level",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "m s**-1",
+      "attrs": {
+        "long_name": "V component of wind",
+        "short_name": "v",
+        "standard_name": "northward_wind",
+        "units": "m s**-1"
+      },
+      "shape": [
+        43824,
+        4,
+        121,
+        161
+      ],
+      "chunks": [
+        360,
+        4,
+        121,
+        161
+      ]
+    }
+  }
 }

@@ -48,6 +48,15 @@ class StacGenerator(abc.ABC):
     def get_dataset(self, source: object) -> xr.Dataset:
         """Return an ``xarray.Dataset`` (lazy) for the source."""
 
+    def _enrich_collection_metadata(self, collection: Dict[str, object], ds: xr.Dataset) -> Dict[str, object]:
+        """Hook to enrich collection metadata. Default implementation does nothing."""
+        return collection
+
+    def _enrich_item_metadata(self, item: Dict[str, object], ds: xr.Dataset) -> Dict[str, object]:
+        """Hook to enrich item metadata. Default implementation does nothing."""
+        return item
+
+
     # ------------------------------------------------------------------
     # Helper methods – can be overridden but have a default implementation
     # ------------------------------------------------------------------
@@ -55,19 +64,8 @@ class StacGenerator(abc.ABC):
         """Format a datetime object/string to RFC 3339 string (Z-suffixed)."""
         return pd.to_datetime(dt).strftime('%Y-%m-%dT%H:%M:%SZ')
 
-    def _compute_gsd(self, ds: xr.Dataset) -> float:
-        """Estimate Ground Sample Distance (GSD) in meters from latitude."""
-        try:
-            if "latitude" in ds.coords:
-                lat = ds.latitude
-                if lat.size > 1:
-                    # Calculate mean difference in degrees
-                    diff = abs(lat[1] - lat[0]).item()
-                    # Approx 111,000 meters per degree
-                    return round(diff * 111000, 2)
-        except Exception:
-            pass
-        return 0.0
+    # _compute_gsd removed as requested
+
 
     def _compute_extent(self, ds: xr.Dataset) -> Dict[str, List]:
         """Compute spatial bbox and temporal interval from an ``xarray`` dataset.
@@ -113,11 +111,6 @@ class StacGenerator(abc.ABC):
 
         extent = self._compute_extent(ds)
         
-        # Calculate GSD if not provided
-        gsd = meta.get("gsd")
-        if gsd is None:
-            gsd = self._compute_gsd(ds)
-
         collection = {
             "type": "Collection",
             "id": meta.get("id", "generated_collection"),
@@ -129,13 +122,15 @@ class StacGenerator(abc.ABC):
             "license": "CC-BY-4.0",
             "extent": extent,
             "summaries": {
-                "gsd": [gsd],
                 "processing:level": level,
                 "platform": [meta.get("platform", "unknown")],
-                # "variables" will be filled after the first item is generated
             },
             "links": [],
         }
+
+        # Hook for subclasses to enrich metadata (e.g. using xstac)
+        collection = self._enrich_collection_metadata(collection, ds)
+
 
         self.collection_path.parent.mkdir(parents=True, exist_ok=True)
         self.collection_path.write_text(json.dumps(collection, indent=2))
@@ -208,12 +203,6 @@ class StacGenerator(abc.ABC):
         
         collection_id = meta.get('id', 'generated_collection')
         item_id = f"{collection_id}-{year}"
-        
-        # Calculate GSD if not provided
-        gsd = meta.get("gsd")
-        if gsd is None:
-            gsd = self._compute_gsd(ds_year)
-        
         item = {
             "type": "Feature",
             "stac_version": "1.0.0",
@@ -224,7 +213,6 @@ class StacGenerator(abc.ABC):
             "properties": {
                 "start_datetime": start,
                 "end_datetime": end,
-                "gsd": gsd,
                 "platform": meta.get("platform", "unknown"),
                 "variables": variables,
             },
@@ -243,4 +231,8 @@ class StacGenerator(abc.ABC):
                 {"rel": "self", "href": f"./{item_id}.json", "type": "application/json"},
             ],
         }
+        
+        # Hook for subclasses to enrich metadata (e.g. using xstac)
+        item = self._enrich_item_metadata(item, ds_year)
+        
         return item

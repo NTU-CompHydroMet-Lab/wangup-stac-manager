@@ -16,11 +16,11 @@ sources:
       platform: "GPM"
       gsd: 10000 # Approx 0.1 deg
 
-  imerg_silver:
-    description: "IMERG v07 Final (Silver)"
+  imerg_early:
+    description: "IMERG v07 Early (Silver)"
     driver: zarr
     args:
-      urlpath: "/home/N/h/isaac-10009/Data/_silver_data/IMERG_V07/Final/Final/*.zarr"
+      urlpath: /home/NAS/homes/isaac-10009/Data/_silver_data/IMERG_V07/Early/*.zarr
       consolidated: true
     metadata:
       tier: "silver"
