@@ -7,7 +7,7 @@ sources:
     description: "IMERG v07 Early/Late/Final (Bronze)"
     driver: netcdf
     args:
-      urlpath: "/home/NAS/data/_Bronze/IMERG_v07/Final/Level/*/*.HDF5"
+      urlpath: "/home/NAS/data/_Bronze/IMERG_v07/Final/*/*.HDF5"
       # Note: HDF5 often requires netcdf4 driver or specific hdf5 driver. 
       # Intake-xarray can open HDF5 via xarray if netcdf4/h5netcdf is installed.
     metadata:

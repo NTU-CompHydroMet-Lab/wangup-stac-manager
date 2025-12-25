@@ -35,11 +35,6 @@
   },
   "links": [
     {
-      "rel": "root",
-      "href": "./collection.json",
-      "type": "application/json"
-    },
-    {
       "rel": "self",
       "href": "./collection.json",
       "type": "application/json"
@@ -67,6 +62,16 @@
     {
       "rel": "item",
       "href": "./items/era5_east_asia-2023.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "../era5_catalog.json",
       "type": "application/json"
     }
   ],

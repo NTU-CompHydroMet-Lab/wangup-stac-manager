@@ -11,6 +11,7 @@ import abc
 import json
 from pathlib import Path
 from typing import Dict, List
+import warnings
 
 import pandas as pd
 import xarray as xr
@@ -67,17 +68,28 @@ class StacGenerator(abc.ABC):
     # _compute_gsd removed as requested
 
 
+    def _get_spatial_dims(self, ds: xr.Dataset):
+        """Helper to get longitude and latitude arrays regardless of name."""
+        lon = ds.longitude if "longitude" in ds.coords else ds.lon if "lon" in ds.coords else None
+        lat = ds.latitude if "latitude" in ds.coords else ds.lat if "lat" in ds.coords else None
+        return lon, lat
+
     def _compute_extent(self, ds: xr.Dataset) -> Dict[str, List]:
         """Compute spatial bbox and temporal interval from an ``xarray`` dataset.
 
         Returns a dict matching the STAC ``extent`` schema.
         """
         try:
-            lon_min = float(ds.longitude.min())
-            lon_max = float(ds.longitude.max())
-            lat_min = float(ds.latitude.min())
-            lat_max = float(ds.latitude.max())
-            spatial_bbox = [[lon_min, lat_min, lon_max, lat_max]]
+            lon, lat = self._get_spatial_dims(ds)
+            if lon is not None and lat is not None:
+                lon_min = float(lon.min())
+                lon_max = float(lon.max())
+                lat_min = float(lat.min())
+                lat_max = float(lat.max())
+                spatial_bbox = [[lon_min, lat_min, lon_max, lat_max]]
+            else:
+                warnings.warn("Could not find longitude/latitude coordinates.")
+                spatial_bbox = [[-180.0, -90.0, 180.0, 90.0]]
         except Exception as exc:  # pragma: no cover
             warnings.warn(f"Unable to compute spatial bbox: {exc}")
             spatial_bbox = [[-180.0, -90.0, 180.0, 90.0]]
@@ -190,11 +202,15 @@ class StacGenerator(abc.ABC):
     # Item creation – can be overridden by subclasses if needed
     # ------------------------------------------------------------------
     def _make_item(self, ds_year: xr.Dataset, year: int, meta: Dict[str, object]) -> Dict[str, object]:
-        lon_min = float(ds_year.longitude.min())
-        lon_max = float(ds_year.longitude.max())
-        lat_min = float(ds_year.latitude.min())
-        lat_max = float(ds_year.latitude.max())
-        bbox = [lon_min, lat_min, lon_max, lat_max]
+        lon, lat = self._get_spatial_dims(ds_year)
+        if lon is not None and lat is not None:
+            lon_min = float(lon.min())
+            lon_max = float(lon.max())
+            lat_min = float(lat.min())
+            lat_max = float(lat.max())
+            bbox = [lon_min, lat_min, lon_max, lat_max]
+        else:
+            bbox = [-180.0, -90.0, 180.0, 90.0]
         
         start = self._format_datetime(ds_year.time.min().values)
         end = self._format_datetime(ds_year.time.max().values)

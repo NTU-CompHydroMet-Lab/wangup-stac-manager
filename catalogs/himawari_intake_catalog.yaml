@@ -1,0 +1,76 @@
+# Himawari CLP Data Catalog
+# Last updated: 2025-11-01
+# Cloud Property L2 Product for mesoscale convection analysis
+
+sources:
+  himawri_clp_2023:
+    description: |
+      Himawari-8/9 Cloud Property (CLP) L2 Product - Year 2023
+      High-resolution cloud top temperature, height, and type data
+
+      Spatial Coverage:
+      - Domain: Taiwan region (20°N-27°N, 118°E-123.5°E)
+      - Resolution: 0.05° (~5 km)
+      - Grid: 2401 × 2401 pixels
+
+      Temporal Coverage:
+      - Period: 2023 (Full Year)
+      - Resolution: 10-minute intervals
+
+      Variables Available:
+      - CLTT: Cloud Top Temperature (K) - Primary variable for mesoscale analysis
+      - CLTH: Cloud Top Height (m)
+      - CLTYPE: Cloud Type classification
+      - CLOT: Cloud Optical Thickness
+      - CLER_23: Clear sky radiance
+      - QA: Quality assurance flags
+
+    driver: zarr
+
+    args:
+      urlpath:
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_01_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_02_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_03_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_04_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_05_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_06_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_07_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_08_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_09_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_10_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_11_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_12_clp_5km.zarr
+
+      combine: "by_coords"
+      combine_attrs: "drop_conflicts"
+      consolidated: False
+
+    metadata:
+      source: Himawari-8/9 Satellite
+      provider: Japan Meteorological Agency (JMA)
+      product: Cloud Property (CLP) L2
+      processing_level: Level 2
+      temporal_coverage: 2023
+
+  himawari_clp_2022:
+    description: |
+      Himawari-8/9 CLP - Year 2022 (Partial)
+      8 months available (some with corruption issues)
+
+    driver: zarr
+
+    args:
+      urlpath:
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2022_01_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2022_03_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2022_04_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2022_05_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2022_06_clp_5km.zarr
+
+      combine: "by_coords"
+      consolidated: False
+
+    metadata:
+      temporal_coverage: 2022 (partial - 5 usable months)
+      note: Some months corrupted (Feb, Jul, Aug)

@@ -123,12 +123,19 @@ class IntakeXarrayGenerator(StacGenerator):
             }
             
             # Simple heuristic for dimension mapping
+            # Simple heuristic for dimension mapping
             if "time" in ds.dims:
                 kw["temporal_dimension"] = "time"
+            
             if "longitude" in ds.dims:
                 kw["x_dimension"] = "longitude"
+            elif "lon" in ds.dims:
+                kw["x_dimension"] = "lon"
+                
             if "latitude" in ds.dims:
                 kw["y_dimension"] = "latitude"
+            elif "lat" in ds.dims:
+                kw["y_dimension"] = "lat"
                 
             out_col = xstac.xarray_to_stac(ds, template, **kw)
             
@@ -193,10 +200,16 @@ class IntakeXarrayGenerator(StacGenerator):
             }
             if "time" in ds.dims:
                 kw["temporal_dimension"] = "time"
+            
             if "longitude" in ds.dims:
                 kw["x_dimension"] = "longitude"
+            elif "lon" in ds.dims:
+                kw["x_dimension"] = "lon"
+                
             if "latitude" in ds.dims:
                 kw["y_dimension"] = "latitude"
+            elif "lat" in ds.dims:
+                kw["y_dimension"] = "lat"
                 
             out_col = xstac.xarray_to_stac(ds, template, **kw)
             out_dict = out_col.to_dict()

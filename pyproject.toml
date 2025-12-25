@@ -20,4 +20,5 @@ dependencies = [
     "zarr>=3.1.5",
     "uvicorn>=0.30.0",
     "xstac>=1.0.0",
+    "h5netcdf>=1.7.3",
 ]

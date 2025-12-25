@@ -44,29 +44,24 @@ Ensure you have [uv](https://github.com/astral-sh/uv) installed.
 uv sync
 ```
 
-### 2. Generate STAC Catalog
+### 2. Build STAC Catalog
 
-This reads all catalogs in `catalogs/` and generates JSON files in `stac_output/`.
-
-```bash
-# Generate all datasets
-python scripts/generate_stac.py --source all --catalog catalogs
-```
-
-### 3. Build Hierarchy
-
-Link all generated collections into a unified Root Catalog.
+Use the unified CLI to generate catalogs and update the root hierarchy in one go.
 
 ```bash
-python scripts/generate_root_catalog.py
+# Build specific dataset (recommended)
+python src/main.py build --catalog catalogs/era5_intake_catalog.yaml --source era5_east_asia
+
+# Or build everything (experimental)
+python src/main.py build
 ```
 
-### 4. Serve & Browse
+### 3. Serve & Browse
 
 Start the local server to view your catalog.
 
 ```bash
-python src/server.py
+python src/main.py serve
 ```
 
 Open **[http://localhost:8001](http://localhost:8001)** in your browser.

@@ -1,0 +1,250 @@
+{
+  "type": "Collection",
+  "id": "himawri_clp_2023",
+  "stac_version": "1.0.0",
+  "description": "Generated STAC collection (static) via intake\u2011xarray",
+  "license": "CC-BY-4.0",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          80.0,
+          -60.0,
+          200.0,
+          60.0
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2023-01-01T00:00:00Z",
+          "2023-12-31T23:50:00Z"
+        ]
+      ]
+    }
+  },
+  "summaries": {
+    "processing:level": [
+      "bronze",
+      "silver"
+    ],
+    "platform": [
+      "unknown"
+    ]
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./items/himawri_clp_2023-2023.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "../himawri_catalog.json",
+      "type": "application/json"
+    }
+  ],
+  "stac_extensions": [
+    "https://stac-extensions.github.io/datacube/v2.2.0/schema.json"
+  ],
+  "cube:dimensions": {
+    "time": {
+      "extent": [
+        "2023-01-01T00:00:00Z",
+        "2023-12-31T23:50:00Z"
+      ],
+      "type": "temporal"
+    },
+    "longitude": {
+      "axis": "x",
+      "extent": [
+        80.0,
+        200.0
+      ],
+      "description": "longitude",
+      "reference_system": "EPSG:4326",
+      "type": "spatial"
+    },
+    "latitude": {
+      "axis": "y",
+      "extent": [
+        -60.0,
+        60.0
+      ],
+      "description": "latitude",
+      "reference_system": "EPSG:4326",
+      "type": "spatial"
+    }
+  },
+  "cube:variables": {
+    "CLOT": {
+      "type": "data",
+      "description": "Cloud Optical Thickness",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "Dimensionless",
+      "attrs": {
+        "long_name": "Cloud Optical Thickness",
+        "units": "Dimensionless",
+        "valid_max": 15000,
+        "valid_min": 0
+      },
+      "shape": [
+        51717,
+        2401,
+        2401
+      ],
+      "chunks": [
+        144,
+        601,
+        601
+      ]
+    },
+    "CLER_23": {
+      "type": "data",
+      "description": "Cloud Effective Radius using band 6",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "micro meter",
+      "attrs": {
+        "long_name": "Cloud Effective Radius using band 6",
+        "units": "micro meter",
+        "valid_max": 10000,
+        "valid_min": 0
+      },
+      "shape": [
+        51717,
+        2401,
+        2401
+      ],
+      "chunks": [
+        144,
+        601,
+        601
+      ]
+    },
+    "CLTT": {
+      "type": "data",
+      "description": "Cloud Top Temperature",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "K",
+      "attrs": {
+        "long_name": "Cloud Top Temperature",
+        "units": "K",
+        "valid_max": 20000,
+        "valid_min": 0
+      },
+      "shape": [
+        51717,
+        2401,
+        2401
+      ],
+      "chunks": [
+        144,
+        601,
+        601
+      ]
+    },
+    "CLTYPE": {
+      "type": "data",
+      "description": "0=Clear, 1=Ci, 2=Cs, 3=Deep convection, 4=Ac, 5=As, 6=Ns, 7=Cu, 8=Sc, 9=St, 10=Unknown, 255=Fill",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "Dimensionless",
+      "attrs": {
+        "description": "0=Clear, 1=Ci, 2=Cs, 3=Deep convection, 4=Ac, 5=As, 6=Ns, 7=Cu, 8=Sc, 9=St, 10=Unknown, 255=Fill",
+        "long_name": "Cloud Type under ISCCP Cloud Type Classification Definition",
+        "units": "Dimensionless",
+        "valid_max": 10,
+        "valid_min": 0
+      },
+      "shape": [
+        51717,
+        2401,
+        2401
+      ],
+      "chunks": [
+        144,
+        601,
+        601
+      ]
+    },
+    "CLTH": {
+      "type": "data",
+      "description": "Cloud Top Height",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "km",
+      "attrs": {
+        "long_name": "Cloud Top Height",
+        "units": "km",
+        "valid_max": 20000,
+        "valid_min": 0
+      },
+      "shape": [
+        51717,
+        2401,
+        2401
+      ],
+      "chunks": [
+        144,
+        601,
+        601
+      ]
+    },
+    "QA": {
+      "type": "data",
+      "description": "(2,1,0) Cloud Retrieval Algorithm Flag: 000=Outside of Scan, 001=No Cloud Mask, 010=Clear, 011=Failed, 100=Successful: Low Confidence, 101=Successful: High Confidence, 110=TBD, 111=TBD; (4,3) Cloud Mask Confidence Level Flag: 00=Clear, 01=Probably Clear, 10=Probably Cloudy, 11=Cloudy; (6,5) Cloud Retrieval Phase Flag: 00=Clear, 01=Liquid Water, 10=Mixed or Uncertain, 11=Ice; (7) Spare: 0=TBD, 1=TBD; (8) Sunglint Flag: 0=Yes, 1=No; (9) Snow Ice Background Possibility Flag: 0=Yes, 1=No; (11,10) Land/Water Flag: 00=Water, 01=Coastal, 10=TBD, 11=Land; (12) SOZ>80 or SAZ>70: 0=Yes, 1=No; (13) Subpixel Inhomogeneity Flag: 0=Yes, 1=No; (14) Multilayer Cloud Flag: 0=Yes, 1=No; (15) Inversion Layer Flag: 0=Yes, 1=No;",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "Dimensionless",
+      "attrs": {
+        "description": "(2,1,0) Cloud Retrieval Algorithm Flag: 000=Outside of Scan, 001=No Cloud Mask, 010=Clear, 011=Failed, 100=Successful: Low Confidence, 101=Successful: High Confidence, 110=TBD, 111=TBD; (4,3) Cloud Mask Confidence Level Flag: 00=Clear, 01=Probably Clear, 10=Probably Cloudy, 11=Cloudy; (6,5) Cloud Retrieval Phase Flag: 00=Clear, 01=Liquid Water, 10=Mixed or Uncertain, 11=Ice; (7) Spare: 0=TBD, 1=TBD; (8) Sunglint Flag: 0=Yes, 1=No; (9) Snow Ice Background Possibility Flag: 0=Yes, 1=No; (11,10) Land/Water Flag: 00=Water, 01=Coastal, 10=TBD, 11=Land; (12) SOZ>80 or SAZ>70: 0=Yes, 1=No; (13) Subpixel Inhomogeneity Flag: 0=Yes, 1=No; (14) Multilayer Cloud Flag: 0=Yes, 1=No; (15) Inversion Layer Flag: 0=Yes, 1=No;",
+        "long_name": "Quality Assurance",
+        "units": "Dimensionless",
+        "valid_max": 65535,
+        "valid_min": 0
+      },
+      "shape": [
+        51717,
+        2401,
+        2401
+      ],
+      "chunks": [
+        144,
+        601,
+        601
+      ]
+    }
+  }
+}

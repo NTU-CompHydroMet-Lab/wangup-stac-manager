@@ -1,0 +1,29 @@
+{
+  "type": "Catalog",
+  "id": "imerg-catalog",
+  "stac_version": "1.0.0",
+  "description": "Catalog for imerg datasets",
+  "links": [
+    {
+      "rel": "root",
+      "href": "./catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "./catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "./imerg_catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "child",
+      "href": "./imerg_early/collection.json",
+      "type": "application/json",
+      "title": "Generated STAC collection (static) via intake\u2011xarray"
+    }
+  ]
+}

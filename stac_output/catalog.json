@@ -16,6 +16,18 @@
     },
     {
       "rel": "child",
+      "href": "./himawri_catalog.json",
+      "type": "application/json",
+      "title": "himawri Data"
+    },
+    {
+      "rel": "child",
+      "href": "./imerg_catalog.json",
+      "type": "application/json",
+      "title": "imerg Data"
+    },
+    {
+      "rel": "child",
       "href": "./radar_catalog.json",
       "type": "application/json",
       "title": "radar Data"
