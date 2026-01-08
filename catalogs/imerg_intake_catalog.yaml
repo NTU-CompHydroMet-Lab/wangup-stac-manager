@@ -17,15 +17,99 @@ sources:
       gsd: 10000 # Approx 0.1 deg
 
   imerg_early:
-    description: "IMERG v07 Early (Silver)"
+    description: "IMERG v07 Early (Silver) - Integrated Multi-satellitE Retrievals for GPM"
     driver: zarr
     args:
       urlpath: /home/NAS/homes/isaac-10009/Data/_silver_data/IMERG_V07/Early/*.zarr
       consolidated: true
     metadata:
+      id: "imerg_early_v07"
       tier: "silver"
       source: "NASA"
       platform: "GPM"
       gsd: 10000
       processing_level: "analysis_ready"
       coordinate_system: "WGS84"
+      
+      # --- GEE-Style Rich Metadata ---
+      description: |
+        The Integrated Multi-satellitE Retrievals for GPM (IMERG) algorithm fuses information from 
+        the GPM satellite constellation to estimate precipitation over the majority of the Earth's surface.
+        
+        This dataset is the 'Early' run, provided by NASA and hosted by NTU CompHydroMet Lab.
+        
+        **Methodology**:
+        IMERG unifies precipitation estimates from the GPM constellation...
+        
+        **Known Issues**:
+        - Early run data may have higher latency...
+      
+      # Scientific Extension
+      "sci:citation": "Huffman, G.J., et al. (2019). GPM-IMERG Final Precipitation L3 Half Hourly 0.1 degree x 0.1 degree V06, Greenbelt, MD, Goddard Earth Sciences Data and Information Services Center (GES DISC), Accessed: [Data Access Date], 10.5067/GPM/IMERG/3B-HH/06"
+      "sci:doi": "10.5067/GPM/IMERG/3B-HH/06"
+      
+      # Providers with Roles (List of Dicts)
+      providers:
+        - name: "NASA GES DISC"
+          roles: ["producer", "licensor"]
+          url: "https://disc.gsfc.nasa.gov/"
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host"]
+          url: "https://wangup.caece.net/"
+        - name: "NTU CompHydroMet Lab (GitHub)"
+          roles: ["processor"]
+          url: "https://github.com/NTU-CompHydroMet-Lab"
+          
+
+  imerg_final:
+    description: "IMERG v07 Final (Silver) - Integrated Multi-satellitE Retrievals for GPM"
+    driver: zarr
+    args:
+      urlpath: /home/NAS/homes/isaac-10009/Data/_silver_data/IMERG_V07/Final/*.zarr
+      consolidated: true
+    metadata:
+      id: "imerg_final_v07"
+      tier: "silver"
+      source: "NASA"
+      platform: "GPM"
+      gsd: 10000
+      processing_level: "analysis_ready"
+      coordinate_system: "WGS84"
+      
+      # --- GEE-Style Rich Metadata ---
+      description: |
+        The Integrated Multi-satellitE Retrievals for GPM (IMERG) algorithm fuses information from 
+        the GPM satellite constellation to estimate precipitation over the majority of the Earth's surface.
+        
+        This dataset is the 'Final' run, provided by NASA and hosted by NTU CompHydroMet Lab.
+        The Final run uses gauge data for adjustment and is considered the research-quality product.
+        
+        **Methodology**:
+        IMERG unifies precipitation estimates from the GPM constellation...
+        
+        **Known Issues**:
+        - Latency is approx 3.5 months due to gauge data availability.
+      
+      # Scientific Extension
+      "sci:citation": "Huffman, G.J., et al. (2019). GPM-IMERG Final Precipitation L3 Half Hourly 0.1 degree x 0.1 degree V06, Greenbelt, MD, Goddard Earth Sciences Data and Information Services Center (GES DISC), Accessed: [Data Access Date], 10.5067/GPM/IMERG/3B-HH/06"
+      "sci:doi": "10.5067/GPM/IMERG/3B-HH/06"
+      
+      # Providers with Roles
+      providers:
+        - name: "NASA GES DISC"
+          roles: ["producer", "licensor"]
+          url: "https://disc.gsfc.nasa.gov/"
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host"]
+          url: "https://wangup.caece.net/"
+        - name: "NTU CompHydroMet Lab (Code)"
+          roles: ["processor"]
+          url: "https://github.com/NTU-CompHydroMet-Lab"
+          
+      terms_of_use: "Data is available under the NASA Open Data Policy."
+      
+      # Example Code
+      example_notebook: "/home/NAS/homes/isaac-10009/Data/_silver_data/IMERG_V07/Read_IMERG_V07.ipynb"
+      
+      # Visualization Config
+      thumbnail_variable: "precipitation"

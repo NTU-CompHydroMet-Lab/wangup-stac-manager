@@ -9,12 +9,17 @@ from __future__ import annotations
 
 import abc
 import json
+import shutil
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 import warnings
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import xarray as xr
+
+# Set non-interactive backend for matplotlib
+plt.switch_backend('Agg')
 
 
 class StacGenerator(abc.ABC):
@@ -64,6 +69,86 @@ class StacGenerator(abc.ABC):
     def _format_datetime(self, dt) -> str:
         """Format a datetime object/string to RFC 3339 string (Z-suffixed)."""
         return pd.to_datetime(dt).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    def _generate_thumbnail(self, ds: xr.Dataset, item_id: str, target_var: Optional[str] = None) -> Optional[Dict[str, object]]:
+        """Generate a simple map thumbnail (PNG) for the dataset."""
+        print(f"  🖼️ Generating thumbnail for {item_id}...", flush=True)
+        try:
+            # 1. Select variable
+            # STRICT MODE: If target_var is not provided, do not generate thumbnail
+            if not target_var:
+                return None
+                
+            if target_var not in ds.data_vars:
+                print(f"  ⚠️ Targeted variable '{target_var}' not found in dataset. Skipping thumbnail.")
+                return None
+            
+            var_name = target_var
+            
+            # 2. Compute mean over time to get 2D field
+            # Check dimensions - we need spatial dims
+            lon, lat = self._get_spatial_dims(ds)
+            if lon is None or lat is None:
+                return None
+                
+            # Use mean of first 48 steps (24 hours) to ensure data coverage
+            # Single step (isel=0) might be empty/blank.
+            if "time" in ds.dims:
+                da = ds[var_name].isel(time=slice(0, 48)).mean(dim="time", keep_attrs=True)
+            else:
+                da = ds[var_name]
+                
+            # 3. Plot
+            fig, ax = plt.subplots(figsize=(4, 4))
+            
+            # Explicitly specify x/y to ensure correct orientation
+            x_name = lon.name
+            y_name = lat.name
+            
+            # Use robust=True to handle outliers and scale colormap appropriately
+            da.plot(ax=ax, x=x_name, y=y_name, add_colorbar=False, add_labels=False, cmap='viridis', robust=True)
+            ax.set_axis_off()
+            plt.tight_layout(pad=0)
+            
+            # 4. Save
+            thumb_name = f"{item_id}_thumb.png"
+            thumb_path = self.items_dir / thumb_name
+            plt.savefig(thumb_path, transparent=True, bbox_inches='tight', pad_inches=0)
+            plt.close(fig)
+            
+            return {
+                "href": f"./items/{thumb_name}",
+                "type": "image/png",
+                "roles": ["thumbnail"],
+                "title": f"Thumbnail for {item_id}"
+            }
+        except Exception as e:
+            print(f"  ⚠️ Thumbnail generation failed for {item_id}: {e}")
+            return None
+
+    def _process_example_notebook(self, nb_path: str) -> Optional[Dict[str, object]]:
+        """Copy example notebook to output and return Asset dict."""
+        try:
+            src_path = Path(nb_path)
+            if not src_path.exists():
+                print(f"  ⚠️ Example notebook not found: {src_path}")
+                return None
+                
+            examples_dir = self.output_dir / "examples"
+            examples_dir.mkdir(exist_ok=True)
+            
+            dest_path = examples_dir / src_path.name
+            shutil.copy2(src_path, dest_path)
+            
+            return {
+                "href": f"./examples/{src_path.name}",
+                "type": "application/x-ipynb+json",
+                "roles": ["example", "docs"],
+                "title": "Example Usage Notebook"
+            }
+        except Exception as e:
+            print(f"  ⚠️ Failed to process example notebook: {e}")
+            return None
 
     # _compute_gsd removed as requested
 
@@ -132,13 +217,50 @@ class StacGenerator(abc.ABC):
                 "Generated STAC collection (static) via intake‑xarray",
             ),
             "license": "CC-BY-4.0",
+            "stac_extensions": [],
             "extent": extent,
             "summaries": {
                 "processing:level": level,
                 "platform": [meta.get("platform", "unknown")],
             },
             "links": [],
+            "providers": meta.get("providers", []),
         }
+        
+        # --- Handle Scientific Extension & Top-level Props ---
+        # If keys start with "sci:", moving them to top-level and add extension
+        sci_ext_url = "https://stac-extensions.github.io/scientific/v1.0.0/schema.json"
+        
+        for key, value in meta.items():
+            if key.startswith("sci:"):
+                collection[key] = value
+                if sci_ext_url not in collection["stac_extensions"]:
+                    collection["stac_extensions"].append(sci_ext_url)
+                    
+            # Handle terms_of_use (custom field, common in GEE)
+            if key == "terms_of_use" or key == "gee:terms_of_use":
+                 collection["terms_of_use"] = value
+
+        # --- Example Notebook Handling ---
+        example_nb = meta.get("example_notebook")
+        if example_nb:
+            print(f"  📘 Processing example notebook: {example_nb}", flush=True)
+            nb_asset = self._process_example_notebook(example_nb)
+            if nb_asset:
+                if "assets" not in collection:
+                    collection["assets"] = {}
+                collection["assets"]["example_notebook"] = nb_asset
+
+        # --- Collection Thumbnail Generation ---
+        thumb_var = meta.get("thumbnail_variable")
+        if thumb_var:
+            print(f"  🖼️ Generating collection thumbnail (Variable: {thumb_var})...", flush=True)
+            # Pass collection ID and target variable
+            thumb_asset = self._generate_thumbnail(ds, collection["id"], target_var=thumb_var)
+            if thumb_asset:
+                if "assets" not in collection:
+                    collection["assets"] = {}
+                collection["assets"]["thumbnail"] = thumb_asset
 
         # Hook for subclasses to enrich metadata (e.g. using xstac)
         collection = self._enrich_collection_metadata(collection, ds)
@@ -247,7 +369,11 @@ class StacGenerator(abc.ABC):
                 {"rel": "self", "href": f"./{item_id}.json", "type": "application/json"},
             ],
         }
-        
+
+        # --- Thumbnail Generation ---
+        # REMOVED: Item-level thumbnails are too slow and not preferred.
+        # Generated at Collection level instead.
+
         # Hook for subclasses to enrich metadata (e.g. using xstac)
         item = self._enrich_item_metadata(item, ds_year)
         
