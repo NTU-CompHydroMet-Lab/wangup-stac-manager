@@ -23,7 +23,7 @@ yarn-error.log*
 .vscode/
 
 # Optional: Ignore large generated outputs if desired, but keeping for demo
-# stac_output/
+stac_output/
 
 # Documentation
 PRD.md
