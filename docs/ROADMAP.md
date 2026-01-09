@@ -30,12 +30,20 @@
 
 ## 📅 Roadmap (Future Items)
 
-### Phase 2: Dataset Migration & Gap Analysis
-*Branching*: `data/{dataset-name}` (e.g., `data/qpesums`)
+### Phase 2: Architecture Refactoring (Priority)
+*Branching*: `refactor/generators`
+
+-   **Split Generator**: Break `IntakeXarrayGenerator` into:
+    -   `Era5Generator`: Handles Reanalysis specifics, valid variable checks (SST), and time-mean thumbnails.
+    -   `RadarGenerator`: Handles QPESUMS, `MaxDBZ`, and sparse data thumbnails (`max` aggregation).
+    -   `SatelliteGenerator` (Optional): For Himawari/IMERG if logic diverges enough.
+-   **Goal**: Isolate domain logic and ensure robust, dataset-specific metadata handling.
+
+### Phase 3: Dataset Migration & Gap Analysis
+*Branching*: `data/{dataset-name}`
 
 -   **QPESUMS**: Full history scan, verify `gsd` and coordinate system.
--   **ERA5**: Split into strictly defined Collections (Tier differentiation).
--   **Gap Report**: Create a status table of missing metadata for existing datasets.
+-   **Gap Report**: Create a status table of missing metadata.
 
 ### Phase 3: Automation (Auto-trigger)
 *Branching*: `feat/auto-trigger`

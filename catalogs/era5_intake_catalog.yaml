@@ -22,6 +22,8 @@ sources:
   # ============================================================================
   era5_east_asia:
     description: |
+      **ERA5 East Asia Convection**
+      
       ERA5 convection and storm variables (2019-2023)
       Spatial: 10°N-40°N, 100°E-140°E (East Asia)
       Temporal: 2019-2023 (5 years, hourly)
@@ -50,6 +52,8 @@ sources:
         longitude: 161
 
     metadata:
+      id: "era5_east_asia"
+      title: "ERA5 East Asia Convection"
       tags: ["era5", "reanalysis", "east-asia", "convection", "hourly"]
       data_type: "gridded"
       domain: "atmospheric"
@@ -58,12 +62,37 @@ sources:
       source: "ERA5 Reanalysis"
       processing_level: "analysis_ready"
       coordinate_system: "WGS84"
+      category: "REANALYSIS"
+      
+      # Scientific Extension
+      "sci:citation": "Hersbach, H., et al. (2020). The ERA5 global reanalysis. Quarterly Journal of the Royal Meteorological Society, 146(730), 1999–2049."
+      "sci:doi": "10.1002/qj.3803"
+      
+      # Providers
+      providers:
+        - name: "ECMWF"
+          roles: ["producer", "licensor"]
+          url: "https://www.ecmwf.int/"
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host"]
+          url: "https://wangup.caece.net/"
+        - name: "NTU CompHydroMet Lab (Code)"
+          roles: ["processor"]
+          url: "https://github.com/NTU-CompHydroMet-Lab"
+
+      # Visualization
+      thumbnail_variable: "sea_surface_temperature" 
+      
+      # Example Code
+      # example_notebook: "/path/to/notebook.ipynb"
 
   # ============================================================================
   # Global Original (Raw, Non-Rechunked)
   # ============================================================================
   era5_global_cj:
     description: |
+      **ERA5 Global Convection**
+      
       ERA5 original global subset from CJ download (2017-2024)
       Spatial: 60°S-60°N, 0°-359.75°E
       Temporal: 2017-2024 (hourly)
@@ -74,14 +103,14 @@ sources:
 
     args:
       urlpath:
-        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2017_0p25deg_chunk.zarr'
-        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2018_0p25deg_chunk.zarr'
-        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2019_0p25deg_chunk.zarr'
-        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2020_0p25deg_chunk.zarr'
-        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2021_0p25deg_chunk.zarr'
-        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2022_0p25deg_chunk.zarr'
-        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2023_0p25deg_chunk.zarr'
-        - '/home/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2024_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2017_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2018_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2019_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2020_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2021_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2022_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2023_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2024_0p25deg_chunk.zarr'
 
       combine: "nested"
       concat_dim: "time"
@@ -94,6 +123,8 @@ sources:
         longitude: 1440
 
     metadata:
+      id: "era5_global_cj"
+      title: "ERA5 Global Convection"
       tags: ["era5", "reanalysis", "global", "convection", "hourly"]
       data_type: "gridded"
       domain: "atmospheric"
@@ -102,13 +133,30 @@ sources:
       source: "ERA5 Reanalysis"
       processing_level: "raw"
       coordinate_system: "WGS84"
+      category: "REANALYSIS"
       spatial_domain: "Global subset (60S-60N)"
       latitude_range: [-60, 60]
       longitude_range: [0, 359.75]
       temporal_coverage: 2017-2024
       temporal_resolution: hourly
+      
+      # Scientific Extension
+      "sci:citation": "Hersbach, H., et al. (2020). The ERA5 global reanalysis."
+      "sci:doi": "10.1002/qj.3803"
+      
+      # Providers
+      providers:
+        - name: "ECMWF"
+          roles: ["producer", "licensor"]
+          url: "https://www.ecmwf.int/"
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host"]
+          url: "https://wangup.caece.net/"
+        - name: "NTU CompHydroMet Lab (Code)"
+          roles: ["processor"]
+          url: "https://github.com/NTU-CompHydroMet-Lab"
 
-      usage_notes:
+      usage_notes: |
         - Not optimized for direct analysis
         - High memory footprint
         - Recommended: rechunk or subset before analysis

@@ -2,7 +2,36 @@ metadata:
   version: 1
   description: "IMERG Precipitation Data Catalog"
 
+# =============================================================================
+# 📘 STAC CATALOG CONFIGURATION GUIDE (User Manual)
+# =============================================================================
+# This file is an Intake Catalog. We use it to generate a static STAC website.
+#
+# HOW TO ADD A NEW DATASET:
+# 1. Copy an existing block (like 'imerg_early') under 'sources:'.
+# 2. Change the key name (e.g., 'my_new_dataset:').
+# 3. Update the fields below matching your data.
+#
+# FIELD REFERENCE:
+# -----------------------------------------------------------------------------
+# [driver]: 'zarr' (preferred for cloud-ready) or 'netcdf'.
+# [args]:
+#   urlpath: The absolute path to your data files. Use asterisk (*) for wildcards.
+#            Example: /home/data/*.zarr or /home/data/*/*.nc
+#   consolidated: true (Only for Zarr. Set to false if no .zmetadata exists).
+#
+# [metadata]: This is where the STAC information comes from.
+#   id: (Required) Unique identifier. URL-safe (lowercase, no spaces, use _).
+#   category: (Required) Grouping in the main menu (SATELLITE, RADAR, etc.).
+#   description: (Recommended) Detailed info. Supports generic Markdown.
+#   thumbnail_variable: (Optional) Which variable to plot for the map icon?
+#   thumbnail_path: (Optional) If you have a custom PNG file, put the path here.
+#   keywords: (Optional) List of tags for search (e.g. ["precipitation", "satellite"]).
+#   providers: (Recommended) Who made the data? Who hosts it?
+# =============================================================================
+
 sources:
+  # Dataset 1
   imerg_bronze:
     description: "IMERG v07 Early/Late/Final (Bronze)"
     driver: netcdf
@@ -11,11 +40,60 @@ sources:
       # Note: HDF5 often requires netcdf4 driver or specific hdf5 driver. 
       # Intake-xarray can open HDF5 via xarray if netcdf4/h5netcdf is installed.
     metadata:
-      tier: "bronze"
+      # =======================================================================
+      # 1. CORE IDENTIFIERS
+      # =======================================================================
+      id: "imerg_raw_v07"
+      category: "SATELLITE"
+
+      # =======================================================================
+      # 2. DATASET DETAILS
+      # =======================================================================
+      tier: "bronze"  # Indicates Raw / Original Data
       source: "NASA"
       platform: "GPM"
-      gsd: 10000 # Approx 0.1 deg
+      gsd: 10000 
+      processing_level: "L3" # Original L3 files
+      coordinate_system: "WGS84"
 
+      # =======================================================================
+      # 3. DESCRIPTION (Raw Data Context)
+      # =======================================================================
+      description: |
+        **Raw Data (Bronze Tier)**
+        
+        This collection contains the original, unconsolidated HDF5 files as provided by NASA.
+        
+        - **Format**: HDF5
+        - **Frequency**: 30-minute intervals
+        - **Structure**: One file per timestep (Granule).
+        
+        **STAC Generation Strategy**:
+        > Since there are ~17,500 files per year, generating a static STAC Item for every file 
+        > is too slow and creates a heavy catalog.
+        > **Current Status**: This definition exists for reference, but is typically **SKIPPED** 
+        > in the build pipeline (`main.py`) to avoid performance issues.
+        > In the future, this should be handled by a dynamic STAC API or aggregated by day.
+
+      # =======================================================================
+      # 5. PROVIDERS
+      # =======================================================================
+      providers:
+        - name: "NASA GES DISC"
+          roles: ["producer", "licensor"]
+          url: "https://disc.gsfc.nasa.gov/"
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host"]
+          url: "https://wangup.caece.net/"
+
+      # =======================================================================
+      # 6. VISUALIZATION
+      # =======================================================================
+      # Raw data might be hard to plot on-the-fly without processing.
+      # We skip thumbnail generation or use a static generic image.
+      # thumbnail_path: "/path/to/generic_nasa_logo.png"
+
+  # Dataset 2 
   imerg_early:
     description: "IMERG v07 Early (Silver) - Integrated Multi-satellitE Retrievals for GPM"
     driver: zarr
@@ -23,15 +101,53 @@ sources:
       urlpath: /home/NAS/homes/isaac-10009/Data/_silver_data/IMERG_V07/Early/*.zarr
       consolidated: true
     metadata:
-      id: "imerg_early_v07"
-      tier: "silver"
-      source: "NASA"
-      platform: "GPM"
-      gsd: 10000
-      processing_level: "analysis_ready"
-      coordinate_system: "WGS84"
+      # =======================================================================
+      # 1. CORE IDENTIFIERS (MUST FILL)
+      # =======================================================================
       
-      # --- GEE-Style Rich Metadata ---
+      # [Required] Unique ID for the STAC Collection. 
+      # Format: Lowercase, underscores only. No spaces.
+      # Example: "imerg_early_v07"
+      id: "imerg_early_v07"
+
+      # [Required] Category for grouping in the Root Catalog.
+      # Options: SATELLITE, RADAR, REANALYSIS, MODEL, OBSERVATION
+      category: "SATELLITE"
+
+      # =======================================================================
+      # 2. DATASET DETAILS (RECOMMENDED)
+      # =======================================================================
+
+      # [Optional] Processing Tier.
+      # - 'bronze': Raw data, original format.
+      # - 'silver': Calibrated, standardized, analysis-ready.
+      # - 'gold': Aggregated, derived products.
+      tier: "silver"
+
+      # [Optional] Source Organization (Short Name)
+      source: "NASA"
+
+      # [Optional] Platform or Satellite Name
+      platform: "GPM"
+
+      # [Optional] Ground Sample Distance (resolution in meters)
+      # 10000 = 10km (approx 0.1 degree)
+      gsd: 10000
+
+      # [Optional] Processing Level (L1, L2, L3, analysis_ready)
+      processing_level: "analysis_ready"
+
+      # [Optional] Coordinate System (default: WGS84)
+      coordinate_system: "WGS84"
+
+      # [Optional] Keywords/Tags for Search
+      keywords: ["precipitation", "GPM", "satellite", "remote_sensing", "daily", "30-minute", "early"]
+
+      # =======================================================================
+      # 3. DESCRIPTIVE METADATA (MARKDOWN SUPPORTED)
+      # =======================================================================
+      # This text appears on the dataset's landing page. 
+      # You can use headers, lists, and bold text.
       description: |
         The Integrated Multi-satellitE Retrievals for GPM (IMERG) algorithm fuses information from 
         the GPM satellite constellation to estimate precipitation over the majority of the Earth's surface.
@@ -43,12 +159,29 @@ sources:
         
         **Known Issues**:
         - Early run data may have higher latency...
+
+      # =======================================================================
+      # 4. CITATION & LICENSE
+      # =======================================================================
       
-      # Scientific Extension
+      # [Optional] Scientific Citation (How to cite this data)
       "sci:citation": "Huffman, G.J., et al. (2019). GPM-IMERG Final Precipitation L3 Half Hourly 0.1 degree x 0.1 degree V06, Greenbelt, MD, Goddard Earth Sciences Data and Information Services Center (GES DISC), Accessed: [Data Access Date], 10.5067/GPM/IMERG/3B-HH/06"
+
+      # [Optional] Digital Object Identifier (DOI)
       "sci:doi": "10.5067/GPM/IMERG/3B-HH/06"
-      
-      # Providers with Roles (List of Dicts)
+
+      # [Optional] Terms of Use / License
+      terms_of_use: "Data is available under the NASA Open Data Policy."
+
+      # =======================================================================
+      # 5. PROVIDERS
+      # =======================================================================
+      # List of organizations involved.
+      # roles: 
+      #  - 'producer': Original creator (e.g. NASA)
+      #  - 'licensor': License holder
+      #  - 'processor': Who processed it
+      #  - 'host': Who stores/serves it (e.g. NTU CompHydroMet Lab)
       providers:
         - name: "NASA GES DISC"
           roles: ["producer", "licensor"]
@@ -59,8 +192,24 @@ sources:
         - name: "NTU CompHydroMet Lab (GitHub)"
           roles: ["processor"]
           url: "https://github.com/NTU-CompHydroMet-Lab"
+
+      # =======================================================================
+      # 6. VISUALIZATION & RESOURCES
+      # =======================================================================
+
+      # [Optional] Example Notebook Path
+      # Absolute path to a .ipynb file showing how to use the data.
+      example_notebook: "/home/NAS/homes/isaac-10009/Data/_silver_data/IMERG_V07/Read_IMERG_V07.ipynb"
+
+      # [Optional] Thumbnail Configuration
+      # Option A: Auto-generate from a variable (e.g., 'precipitation', 'T2m')
+      thumbnail_variable: "precipitation"
+      
+      # Option B: Use an existing image file (Overwrites Option A)
+      # thumbnail_path: "/path/to/custom_thumbnail.png"
           
 
+  # Dataset 3
   imerg_final:
     description: "IMERG v07 Final (Silver) - Integrated Multi-satellitE Retrievals for GPM"
     driver: zarr
@@ -68,7 +217,19 @@ sources:
       urlpath: /home/NAS/homes/isaac-10009/Data/_silver_data/IMERG_V07/Final/*.zarr
       consolidated: true
     metadata:
+      # =======================================================================
+      # 1. CORE IDENTIFIERS (MUST FILL)
+      # =======================================================================
+      
+      # [Required] Unique ID
       id: "imerg_final_v07"
+
+      # [Required] Category for Root Catalog grouping
+      category: "SATELLITE"
+
+      # =======================================================================
+      # 2. DATASET DETAILS (RECOMMENDED)
+      # =======================================================================
       tier: "silver"
       source: "NASA"
       platform: "GPM"
@@ -76,7 +237,12 @@ sources:
       processing_level: "analysis_ready"
       coordinate_system: "WGS84"
       
-      # --- GEE-Style Rich Metadata ---
+      # [Optional] Keywords/Tags
+      keywords: ["precipitation", "GPM", "satellite", "bias-corrected", "research-quality"]
+      
+      # =======================================================================
+      # 3. DESCRIPTIVE METADATA
+      # =======================================================================
       description: |
         The Integrated Multi-satellitE Retrievals for GPM (IMERG) algorithm fuses information from 
         the GPM satellite constellation to estimate precipitation over the majority of the Earth's surface.
@@ -90,11 +256,16 @@ sources:
         **Known Issues**:
         - Latency is approx 3.5 months due to gauge data availability.
       
-      # Scientific Extension
+      # =======================================================================
+      # 4. CITATION & LICENSE
+      # =======================================================================
       "sci:citation": "Huffman, G.J., et al. (2019). GPM-IMERG Final Precipitation L3 Half Hourly 0.1 degree x 0.1 degree V06, Greenbelt, MD, Goddard Earth Sciences Data and Information Services Center (GES DISC), Accessed: [Data Access Date], 10.5067/GPM/IMERG/3B-HH/06"
       "sci:doi": "10.5067/GPM/IMERG/3B-HH/06"
+      terms_of_use: "Data is available under the NASA Open Data Policy."
       
-      # Providers with Roles
+      # =======================================================================
+      # 5. PROVIDERS
+      # =======================================================================
       providers:
         - name: "NASA GES DISC"
           roles: ["producer", "licensor"]
@@ -106,10 +277,10 @@ sources:
           roles: ["processor"]
           url: "https://github.com/NTU-CompHydroMet-Lab"
           
-      terms_of_use: "Data is available under the NASA Open Data Policy."
-      
-      # Example Code
+      # =======================================================================
+      # 6. VISUALIZATION & RESOURCES
+      # =======================================================================
       example_notebook: "/home/NAS/homes/isaac-10009/Data/_silver_data/IMERG_V07/Read_IMERG_V07.ipynb"
       
-      # Visualization Config
+      # [Optional] Thumbnail Configuration
       thumbnail_variable: "precipitation"

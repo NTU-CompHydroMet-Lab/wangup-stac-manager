@@ -51,6 +51,7 @@ sources:
       provider: Japan Meteorological Agency (JMA)
       product: Cloud Property (CLP) L2
       processing_level: Level 2
+      category: "SATELLITE"
       temporal_coverage: 2023
 
   himawari_clp_2022:

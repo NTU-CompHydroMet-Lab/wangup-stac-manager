@@ -92,6 +92,7 @@ sources:
       source: "Weather Radar Network"
       processing_level: "analysis_ready"
       coordinate_system: "WGS84"
+      category: "RADAR"
       
       # Data quality and processing information
       quality_flags:
@@ -115,7 +116,29 @@ sources:
         - "Ground clutter may affect low-level observations"
         - "Data gaps possible during radar maintenance periods"
       
-      # Example usage
+      # Scientific Extension
+      "sci:citation": "Central Weather Administration (CWA), Taiwan. (2023). QPESUMS Radar Maximum Reflectivity Products."
+      "sci:doi": "10.xxxx/qpesums.tw"
+      
+      # Providers
+      providers:
+        - name: "Central Weather Administration (CWA)"
+          roles: ["producer", "licensor"]
+          url: "https://www.cwa.gov.tw/"
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host"]
+          url: "https://wangup.caece.net/"
+        - name: "NTU CompHydroMet Lab (Code)"
+          roles: ["processor"]
+          url: "https://github.com/NTU-CompHydroMet-Lab"
+
+      # Visualization
+      thumbnail_variable: "MaxDBZ"
+      
+      # Example Code
+      # example_notebook: "/path/to/notebook.ipynb"  # User to fill
+      
+      # Example Code (Inline)
       example_code: |
         import intake
         import xarray as xr
