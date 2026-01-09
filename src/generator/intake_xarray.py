@@ -12,6 +12,8 @@ from typing import Dict, Any
 
 import intake
 import xarray as xr
+import shutil
+from loguru import logger
 
 import pystac
 import xstac
@@ -37,6 +39,11 @@ class IntakeXarrayGenerator(StacGenerator):
     # ------------------------------------------------------------------
     # Abstract API implementation
     # ------------------------------------------------------------------
+    def process_source(self, source_name: str) -> None:
+        """Process a single source from the catalog."""
+        logger.info(f"Processing source: {source_name}")
+        source = self.load_source(source_name)
+
     def load_source(self, source_name: str) -> Any:
         """Open the Intake catalog and return the requested source entry.
 
@@ -89,7 +96,7 @@ class IntakeXarrayGenerator(StacGenerator):
     def _enrich_collection_metadata(self, collection: Dict[str, Any], ds: xr.Dataset) -> Dict[str, Any]:
         """Enrich collection metadata using xstac to extract datacube info."""
         try:
-            print("  ✨ Running xstac to extract rich metadata...")
+            logger.info("Running xstac to extract rich metadata...")
             
             # Create a temporary pystac Collection template from our current dict
             # We need to handle extent objects properly
@@ -123,20 +130,24 @@ class IntakeXarrayGenerator(StacGenerator):
             }
             
             # Simple heuristic for dimension mapping
-            # Simple heuristic for dimension mapping
+            # Improved Dimension Mapping
+            # Helper to find dim case-insensitive
+            def find_dim(possible_names, dims):
+                for name in possible_names:
+                    if name in dims: return name
+                return None
+
             if "time" in ds.dims:
                 kw["temporal_dimension"] = "time"
             
-            if "longitude" in ds.dims:
-                kw["x_dimension"] = "longitude"
-            elif "lon" in ds.dims:
-                kw["x_dimension"] = "lon"
-                
-            if "latitude" in ds.dims:
-                kw["y_dimension"] = "latitude"
-            elif "lat" in ds.dims:
-                kw["y_dimension"] = "lat"
-                
+            x_dim = find_dim(["longitude", "lon", "x"], ds.dims)
+            if x_dim: kw["x_dimension"] = x_dim
+            
+            y_dim = find_dim(["latitude", "lat", "y"], ds.dims)
+            if y_dim: kw["y_dimension"] = y_dim
+            
+            logger.debug(f"xstac config: {kw}")
+
             out_col = xstac.xarray_to_stac(ds, template, **kw)
             
             # Convert back to dict
@@ -164,7 +175,7 @@ class IntakeXarrayGenerator(StacGenerator):
             return collection
             
         except Exception as e:
-            print(f"  ⚠️ xstac enrichment failed: {e}")
+            logger.warning(f"xstac enrichment failed: {e}")
             return collection
 
     def _enrich_item_metadata(self, item: Dict[str, Any], ds: xr.Dataset) -> Dict[str, Any]:
@@ -243,5 +254,5 @@ class IntakeXarrayGenerator(StacGenerator):
             return item
             
         except Exception as e:
-            print(f"  ⚠️ Item xstac enrichment failed: {e}")
+            logger.warning(f"Item xstac enrichment failed: {e}")
             return item

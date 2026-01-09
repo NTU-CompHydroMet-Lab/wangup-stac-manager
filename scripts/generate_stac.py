@@ -2,6 +2,7 @@ import typer
 from pathlib import Path
 from src.generator.intake_xarray import IntakeXarrayGenerator
 import intake
+from loguru import logger
 
 app = typer.Typer()
 
@@ -27,7 +28,7 @@ def main(
     base_output_dir = Path(__file__).parent.parent / "stac_output"
 
     for cat_file in catalogs_to_process:
-        print(f"📂 Opening catalog: {cat_file}")
+        logger.info(f"Opening catalog: {cat_file}")
         try:
             cat = intake.open_catalog(str(cat_file))
             
@@ -39,21 +40,21 @@ def main(
                     sources_to_process = [source]
                 else:
                     # If specific source requested but not in this catalog, skip
-                    print(f"  ⚠️ Source '{source}' not found in catalog '{cat_file}'. Skipping this catalog for this source.")
+                    logger.warning(f"Source '{source}' not found in catalog '{cat_file}'. Skipping this catalog for this source.")
                     continue
 
             for src_name in sources_to_process:
-                print(f"  🚀 Processing source: {src_name}")
+                logger.info(f"Processing source: {src_name}")
                 output_dir = base_output_dir / src_name
                 
                 try:
                     generator = IntakeXarrayGenerator(output_dir=output_dir, catalog_path=cat_file)
                     generator.generate(source_name=src_name)
                 except Exception as e:
-                    print(f"  ⚠️ Failed to generate STAC for {src_name} from catalog {cat_file}: {e}")
+                    logger.error(f"Failed to generate STAC for {src_name} from catalog {cat_file}: {e}")
                     
         except Exception as e:
-            print(f"⚠️ Failed to open catalog {cat_file}: {e}")
+            logger.error(f"Failed to open catalog {cat_file}: {e}")
 
 if __name__ == "__main__":
     app()

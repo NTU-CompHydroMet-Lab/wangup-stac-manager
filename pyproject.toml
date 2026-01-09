@@ -22,4 +22,5 @@ dependencies = [
     "xstac>=1.0.0",
     "h5netcdf>=1.7.3",
     "matplotlib>=3.10.8",
+    "loguru>=0.7.3",
 ]

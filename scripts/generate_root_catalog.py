@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 import typer
+from loguru import logger
 
 app = typer.Typer()
 
@@ -24,12 +25,9 @@ def main() -> None:
             
             # Determine group based on prefix (e.g. era5_east_asia -> era5)
             # If no underscore, use 'other' or the id itself
+            # Determine group based on prefix
             parts = col_id.split('_')
             group_name = parts[0] if len(parts) > 1 else "other"
-            
-            # Special case for QPESUMS or others if needed
-            if col_id.startswith("QPSUMS"):
-                group_name = "radar"
             
             if group_name not in groups:
                 groups[group_name] = []
@@ -40,7 +38,7 @@ def main() -> None:
                 "id": col_id
             })
         except Exception as e:
-            print(f"⚠️ Failed to read collection {col_path}: {e}")
+            logger.warning(f"Failed to read collection {col_path}: {e}")
     
     root_links = [
         {"rel": "root", "href": "./catalog.json", "type": "application/json"},
@@ -81,34 +79,52 @@ def main() -> None:
             col_data['links'] = new_links
             col['path'].write_text(json.dumps(col_data, indent=2))
             
+        # Get category from first collection's summaries
+        # We assume consistent category per group
+        first_col_data = cols[0]['data']
+        summaries = first_col_data.get("summaries", {})
+        categories = summaries.get("category", ["DATA"])
+        category = categories[0] if categories else "DATA"
+        
+        # User requested uppercase name only, no tags
+        display_title = group_name.upper()
+
         group_catalog = {
             "type": "Catalog",
             "id": f"{group_name}-catalog",
+            "title": display_title,
             "stac_version": "1.0.0",
             "description": f"Catalog for {group_name} datasets",
             "links": group_links
         }
         group_catalog_path.write_text(json.dumps(group_catalog, indent=2))
-        print(f"📂 Created Group Catalog: {group_catalog_path}")
+        logger.info(f"Created Group Catalog: {group_catalog_path}")
         
         # Link Root to Group
         root_links.append({
             "rel": "child",
             "href": f"./{group_name}_catalog.json",
             "type": "application/json",
-            "title": f"{group_name} Data"
+            "title": display_title
         })
         
     catalog = {
         "type": "Catalog",
         "id": "stac-root-catalog",
+        "title": "NTU CompHydroMet Lab Data Catalog",
         "stac_version": "1.0.0",
-        "description": "Root Catalog for Research Lab Data",
+        "description": (
+            "The [NTU CompHydroMet Lab](https://wangup.caece.net/) Data Catalog.\n\n"
+            "See also:\n\n"
+            "- [Lab Website](https://wangup.caece.net/)\n"
+            "- [GitHub Repository](https://github.com/NTU-CompHydroMet-Lab)\n"
+        ),
         "links": root_links
     }
+
     
     root_catalog_path.write_text(json.dumps(catalog, indent=2))
-    print(f"🗂  Root Catalog written to {root_catalog_path}")
+    logger.info(f"Root Catalog written to {root_catalog_path}")
 
 if __name__ == "__main__":
     app()
