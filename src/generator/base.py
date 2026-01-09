@@ -247,6 +247,8 @@ class StacGenerator(abc.ABC):
         # --- Dynamic Asset Generation (Refactored) ---
         source_path = ds_year.encoding.get("source")
         if source_path:
+             # Store strict absolute path for user reference (e.g. Copy Path)
+             item["properties"]["source_path"] = str(source_path)
              item["assets"]["data"] = create_data_asset(source_path, item_id, self.items_dir)
         else:
              # Fallback
