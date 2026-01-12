@@ -2,10 +2,9 @@ import typer
 import subprocess
 import sys
 from pathlib import Path
-from rich.console import Console
+from loguru import logger
 
 app = typer.Typer(help="Research Lab STAC Manager CLI")
-console = Console()
 
 @app.command()
 def build(
@@ -37,26 +36,29 @@ def build(
     # For now, let's just pass the args.
     
     if not catalog and not source:
-        console.print("[yellow]No catalog or source specified. Building all known catalogs...[/yellow]")
+        logger.warning("No catalog or source specified. Building all known catalogs...")
         # List of known catalogs to build
         catalogs_to_build = [
             ("catalogs/era5_intake_catalog.yaml", "era5_east_asia"),
+            # ("catalogs/era5_intake_catalog.yaml", "era5_global_cj"), # Source missing on this machine
             ("catalogs/himawari_intake_catalog.yaml", "himawri_clp_2023"),
             ("catalogs/imerg_intake_catalog.yaml", "imerg_early"),
+            ("catalogs/imerg_intake_catalog.yaml", "imerg_final"),
+            ("catalogs/radar_intake_catalog.yaml", "QPESUMS_tw"),
             # ("catalogs/imerg_intake_catalog.yaml", "imerg_bronze"), # Skip bronze for now as it's slow
         ]
         
         for cat, src in catalogs_to_build:
-            console.print(f"\n[bold green]Building {src} from {cat}...[/bold green]")
+            logger.info(f"Building {src} from {cat}...")
             subprocess.run([sys.executable, "scripts/generate_stac.py", "--catalog", cat, "--source", src], check=False)
             
     else:
-        console.print(f"[bold green]Running generation script...[/bold green]")
+        logger.info("Running generation script...")
         subprocess.run(cmd, check=True)
 
     # 2. Update Root Catalog
     if update_root:
-        console.print("\n[bold green]Updating Root Catalog...[/bold green]")
+        logger.info("Updating Root Catalog...")
         subprocess.run([sys.executable, "scripts/generate_root_catalog.py"], check=True)
 
 @app.command()
@@ -66,7 +68,7 @@ def serve(
     """
     Start the static STAC server and browser.
     """
-    console.print(f"[bold green]Starting server on port {port}...[/bold green]")
+    logger.info(f"Starting server on port {port}...")
     # We need to pass the port to server.py, but server.py might not accept args yet.
     # Let's assume server.py runs on 8001 by default or we modify it.
     # For now, just run it.

@@ -1,9 +1,15 @@
 {
   "type": "Collection",
   "id": "era5_east_asia",
+  "title": "ERA5 East Asia Convection",
   "stac_version": "1.0.0",
   "description": "Generated STAC collection (static) via intake\u2011xarray",
+  "keywords": [],
   "license": "CC-BY-4.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/scientific/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/datacube/v2.2.0/schema.json"
+  ],
   "extent": {
     "spatial": {
       "bbox": [
@@ -31,6 +37,9 @@
     ],
     "platform": [
       "unknown"
+    ],
+    "category": [
+      "REANALYSIS"
     ]
   },
   "links": [
@@ -75,9 +84,42 @@
       "type": "application/json"
     }
   ],
-  "stac_extensions": [
-    "https://stac-extensions.github.io/datacube/v2.2.0/schema.json"
+  "providers": [
+    {
+      "name": "ECMWF",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.ecmwf.int/"
+    },
+    {
+      "name": "NTU CompHydroMet Lab",
+      "roles": [
+        "host"
+      ],
+      "url": "https://wangup.caece.net/"
+    },
+    {
+      "name": "NTU CompHydroMet Lab (Code)",
+      "roles": [
+        "processor"
+      ],
+      "url": "https://github.com/NTU-CompHydroMet-Lab"
+    }
   ],
+  "sci:citation": "Hersbach, H., et al. (2020). The ERA5 global reanalysis. Quarterly Journal of the Royal Meteorological Society, 146(730), 1999\u20132049.",
+  "sci:doi": "10.1002/qj.3803",
+  "assets": {
+    "thumbnail": {
+      "href": "./items/era5_east_asia_thumb.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Thumbnail for era5_east_asia"
+    }
+  },
   "cube:dimensions": {
     "time": {
       "extent": [

@@ -34,7 +34,11 @@
     - `src/generator/assets.py`: Asset linking, Symlink logic, Notebooks.
     - **Result**: `base.py` is now a clean orchestrator, importing logic from these modules.
 
+### D. Source Cleanup
+- **Removed Unused Code**: Deleted `src/adapters` as it was legacy/unused.
+- **Added Documentation**: Created `src/README.md` explaining the directory structure and file responsibilities.
+
 ## 3. Next Steps
-- [ ] **Verification**: Confirm the "Symlink Strategy" works for a real remote user (simulation).
+- [x] **Verification**: Confirm the "Symlink Strategy" works for a real remote user (simulation).
 - [ ] **Code Review**: Review the new modular structure.
 - [ ] **Data Handling**: Verify that huge Zarr files are served correctly via `server.py` (FastAPI).

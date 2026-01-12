@@ -1,6 +1,7 @@
 {
   "type": "Catalog",
   "id": "himawri-catalog",
+  "title": "HIMAWRI",
   "stac_version": "1.0.0",
   "description": "Catalog for himawri datasets",
   "links": [

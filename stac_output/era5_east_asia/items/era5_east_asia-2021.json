@@ -33,6 +33,7 @@
       "u_component_of_wind",
       "v_component_of_wind"
     ],
+    "source_path": "/home/sungche/NAS/dataset/era5_rechunked/era5_2019_10N40N_100E140E_rechunked.zarr",
     "cube:dimensions": {
       "time": {
         "extent": [
@@ -515,13 +516,13 @@
     }
   },
   "assets": {
-    "zarr": {
-      "href": "/NAS/dataset/era5_rechunked/era5_2021_10N40N_100E140E_rechunked.zarr",
+    "data": {
+      "href": "./era5_east_asia-2021.zarr",
       "type": "application/vnd+zarr",
       "roles": [
         "data"
       ],
-      "title": "ERA5 2021 Zarr Store"
+      "title": "Data for era5_east_asia-2021"
     }
   },
   "links": [

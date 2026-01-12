@@ -1,17 +1,31 @@
 {
   "type": "Collection",
-  "id": "imerg_early",
+  "id": "imerg_early_v07",
+  "title": "imerg_early_v07",
   "stac_version": "1.0.0",
-  "description": "Generated STAC collection (static) via intake\u2011xarray",
+  "description": "The Integrated Multi-satellitE Retrievals for GPM (IMERG) algorithm fuses information from \nthe GPM satellite constellation to estimate precipitation over the majority of the Earth's surface.\n\nThis dataset is the 'Early' run, provided by NASA and hosted by NTU CompHydroMet Lab.\n\n**Methodology**:\nIMERG unifies precipitation estimates from the GPM constellation...\n\n**Known Issues**:\n- Early run data may have higher latency...\n",
+  "keywords": [
+    "precipitation",
+    "GPM",
+    "satellite",
+    "remote_sensing",
+    "daily",
+    "30-minute",
+    "early"
+  ],
   "license": "CC-BY-4.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/datacube/v2.2.0/schema.json",
+    "https://stac-extensions.github.io/scientific/v1.0.0/schema.json"
+  ],
   "extent": {
     "spatial": {
       "bbox": [
         [
-          -180.0,
-          -90.0,
-          180.0,
-          90.0
+          -179.9499969482422,
+          -89.94999694824219,
+          179.9499969482422,
+          89.94999694824219
         ]
       ]
     },
@@ -31,6 +45,9 @@
     ],
     "platform": [
       "GPM"
+    ],
+    "category": [
+      "SATELLITE"
     ]
   },
   "links": [
@@ -41,57 +58,57 @@
     },
     {
       "rel": "item",
-      "href": "./items/imerg_early-2014.json",
+      "href": "./items/imerg_early_v07-2014.json",
       "type": "application/json"
     },
     {
       "rel": "item",
-      "href": "./items/imerg_early-2015.json",
+      "href": "./items/imerg_early_v07-2015.json",
       "type": "application/json"
     },
     {
       "rel": "item",
-      "href": "./items/imerg_early-2016.json",
+      "href": "./items/imerg_early_v07-2016.json",
       "type": "application/json"
     },
     {
       "rel": "item",
-      "href": "./items/imerg_early-2017.json",
+      "href": "./items/imerg_early_v07-2017.json",
       "type": "application/json"
     },
     {
       "rel": "item",
-      "href": "./items/imerg_early-2018.json",
+      "href": "./items/imerg_early_v07-2018.json",
       "type": "application/json"
     },
     {
       "rel": "item",
-      "href": "./items/imerg_early-2019.json",
+      "href": "./items/imerg_early_v07-2019.json",
       "type": "application/json"
     },
     {
       "rel": "item",
-      "href": "./items/imerg_early-2020.json",
+      "href": "./items/imerg_early_v07-2020.json",
       "type": "application/json"
     },
     {
       "rel": "item",
-      "href": "./items/imerg_early-2021.json",
+      "href": "./items/imerg_early_v07-2021.json",
       "type": "application/json"
     },
     {
       "rel": "item",
-      "href": "./items/imerg_early-2022.json",
+      "href": "./items/imerg_early_v07-2022.json",
       "type": "application/json"
     },
     {
       "rel": "item",
-      "href": "./items/imerg_early-2023.json",
+      "href": "./items/imerg_early_v07-2023.json",
       "type": "application/json"
     },
     {
       "rel": "item",
-      "href": "./items/imerg_early-2024.json",
+      "href": "./items/imerg_early_v07-2024.json",
       "type": "application/json"
     },
     {
@@ -105,9 +122,52 @@
       "type": "application/json"
     }
   ],
-  "stac_extensions": [
-    "https://stac-extensions.github.io/datacube/v2.2.0/schema.json"
+  "providers": [
+    {
+      "name": "NASA GES DISC",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://disc.gsfc.nasa.gov/"
+    },
+    {
+      "name": "NTU CompHydroMet Lab",
+      "roles": [
+        "host"
+      ],
+      "url": "https://wangup.caece.net/"
+    },
+    {
+      "name": "NTU CompHydroMet Lab (GitHub)",
+      "roles": [
+        "processor"
+      ],
+      "url": "https://github.com/NTU-CompHydroMet-Lab"
+    }
   ],
+  "sci:citation": "Huffman, G.J., et al. (2019). GPM-IMERG Final Precipitation L3 Half Hourly 0.1 degree x 0.1 degree V06, Greenbelt, MD, Goddard Earth Sciences Data and Information Services Center (GES DISC), Accessed: [Data Access Date], 10.5067/GPM/IMERG/3B-HH/06",
+  "sci:doi": "10.5067/GPM/IMERG/3B-HH/06",
+  "terms_of_use": "Data is available under the NASA Open Data Policy.",
+  "assets": {
+    "example_notebook": {
+      "href": "./examples/Read_IMERG_V07.ipynb",
+      "type": "application/x-ipynb+json",
+      "roles": [
+        "example",
+        "docs"
+      ],
+      "title": "Example Usage Notebook"
+    },
+    "thumbnail": {
+      "href": "./items/imerg_early_v07_thumb.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Thumbnail for imerg_early_v07"
+    }
+  },
   "cube:dimensions": {
     "time": {
       "extent": [

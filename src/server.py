@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 # This allows accessing files exactly as they are on disk, preserving relative links.
 # e.g. /stac/era5/collection.json
 stac_dir = Path(__file__).parent.parent / "stac_output"
-app.mount("/stac", StaticFiles(directory=stac_dir), name="stac")
+app.mount("/stac", StaticFiles(directory=stac_dir, follow_symlink=True), name="stac")
 
 # Serve the STAC‑Browser UI (static files)
 # We mount the built 'dist' directory at the root.
