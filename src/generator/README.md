@@ -1,95 +1,53 @@
-# Module: Generator
+# Generator Engine
 
-## Module Description
-The `generator` module encapsulates the core business logic for converting raw data sources into STAC specifications. It follows a **Template Method** pattern where the abstract base class defines the workflow, and concrete implementations handle specific data source types (e.g., Intake-Xarray).
-
-**Responsibilities:**
-1.  **Metadata Abstraction**: extracting unified metadata from diverse sources.
-2.  **Validation**: Enforcing schema requirements via Pydantic models.
-3.  **Asset Creation**: Generating derivative assets like thumbnails and linking example notebooks.
-4.  **STAC Generation**: Creating `Collection` and `Item` objects with calculated spatial/temporal extents.
+The **Generator Engine** (`src/generator`) is the core component responsible for ingesting data from Intake sources and transforming them into valid STAC Items and Collections.
 
 ## Architecture
 
-```mermaid
-classDiagram
-    class StacGenerator {
-        <<Abstract>>
-        +generate(source_name)
-        #_load_or_create_collection()
-        #_make_item()
-    }
-    class IntakeXarrayGenerator {
-        +process_source()
-        +extract_metadata()
-        +get_dataset()
-    }
-    class DatasetMetadata {
-        <<Pydantic Model>>
-        +id: str
-        +description: str
-        +thumbnail_variable: str
-    }
-    
-    StacGenerator <|-- IntakeXarrayGenerator : Inherits
-    StacGenerator --> DatasetMetadata : Validates Metadata
-    StacGenerator ..> Thumbnails : Uses
-    StacGenerator ..> Assets : Uses
+The generator follows a pipeline approach:
+1.  **Load Source**: Reads metadata and opens the dataset using `Intake`.
+2.  **Extract Metadata**: Parses attributes from the source driver.
+3.  **Enrich Metadata (`xstac`)**: Uses `xstac` to extract Data Cube dimensions (Reference System, Temporal, Spatial) compatible with STAC extensions.
+4.  **Geometry correction (`antimeridian`, `shapely`)**: Computes valid GeoJSON geometries, handling complex cases like Antimeridian crossing (Pacific-centered views).
+5.  **Generate Items**: Iterates through time slices (e.g., yearly) to create STAC Items.
+6.  **Thumbnail Generation**: Creates visual previews using `matplotlib`, with special handling for coordinate wrapping.
+
+## Key Libraries & Responsibilities
+
+### `intake-xarray` & `intake`
+-   **Role**: Data Abstraction Layer.
+-   **Function**: Configuration-driven access to NetCDF, Zarr, and GRIB files. Allows us to treat local files and remote objects uniformly.
+
+### `xstac`
+-   **Role**: STAC Metadata Enrichment.
+-   **Function**: Analyzes `xarray.Dataset` objects to auto-populate `cube:dimensions` and `summaries`. It ensures we have standardized DescribeCoverage-like metadata without manual config.
+
+### `cf_xarray`
+-   **Role**: Climate and Forecast (CF) Convention Parsing.
+-   **Function**: Used by `xstac` and our internal utils to reliably detect logical axes (Latitude vs Longitude, Time) regardless of variable naming (`lat`, `LATITUDE`, `y`, etc.).
+
+### `antimeridian` & `shapely`
+-   **Role**: Geometry Construction & Correction.
+-   **Function**: 
+    -   `shapely`: Constructs raw Polygons from Bounding Boxes.
+    -   `antimeridian`: Splits Polygons that cross the 180th meridian (datateline) into properties MultiPolygons. This is critical for Pacific-centered datasets (e.g., Himawari) to be valid in STAC/GeoJSON.
+
+## Key Modules
+
+-   **`intake_xarray.py`**: The main driver for NetCDF/Zarr sources. Handles normalization (0-360 -> -180/180) and calls enrichment hooks.
+-   **`utils.py`**: Shared logic for:
+    -   `fix_pacific_bbox`: Detecting and fixing BBox for Pacific views.
+    -   `compute_item_geometry`: Generating valid split geometries.
+    -   `get_spatial_dims`: Robust coordinate extraction.
+-   **`thumbnails.py`**: Visual generation.
+
+## Usage
+
+The generator is typically invoked by the `src.core.builder` module only, not directly by CLI.
+
+```python
+from src.generator.intake_xarray import IntakeXarrayGenerator
+
+gen = IntakeXarrayGenerator(output_dir=Path("./out"), catalog_path=Path("cat.yaml"))
+gen.generate("source_id")
 ```
-
-## Dependencies
-
-- **Data Processing**: `xarray`, `pandas`, `numpy`, `cf_xarray`
-- **STAC**: `pystac`, `xstac`
-- **Visualization**: `matplotlib`
-- **Internal**: `src.generator.model` (Schema definition)
-
-## Key Assumptions & Design
-
-### 1. Tiered Metadata Structure
-The generator assumes Intake YAMLs are structured in 4 tiers. This is **critical** for correct STAC mapping:
-*   **Core Identity**: `id`, `category` (Required for valid STAC Item).
-*   **Display**: `description`, `thumbnail_variable` (Used for UI).
-*   **Scientific**: `sci:citation`, `platform` (Mapped to STAC Extensions).
-*   **Providers**: `providers` list (Mapped to STAC Provider objects).
-
-### 2. Strict Validation (`model.py`)
-We use Pydantic models to parse Intake metadata.
-*   **Why?** To catch configuration errors early (e.g., missing ID) rather than generating broken STAC catalogs.
-*   **Dev Note**: If you add a new field to Intake YAML, you **must** add it to `DatasetMetadata` in `model.py` or it will be ignored (or raise an error depending on config).
-
-### 3. Event-Centric Thumbnails (`thumbnails.py`)
-The generator is designed to select a specific timestamp (`target_datetime`) for thumbnails.
-*   **Assumption**: Weather datasets are best represented by specific events (Typhoons, Fronts) rather than average conditions.
-*   **Logic**: If `thumbnail_datetime` is provided in YAML, we use Nearest Neighbor lookup. If missing, we fallback to the middle timestep.
-
-## Local API Reference
-
-### `base.py`
-- **`StacGenerator` (Class)**
-    - **Description**: The abstract base class that defines the generation lifecycle.
-    - **Key Methods**:
-        - `generate(source_name: str)`: The main driver method.
-        - `_load_or_create_collection(...)`: Manages the parent Collection creation.
-        - `_make_item(...)`: Creates individual STAC Items for each time slice (e.g., yearly).
-
-### `intake_xarray.py`
-- **`IntakeXarrayGenerator` (Class)**
-    - **Description**: Concrete implementation for sources defined in Intake catalogs via Xarray.
-    - **Key Methods**:
-        - `extract_metadata(source)`: Normalizes the raw Intake metadata into a dictionary matching `DatasetMetadata`.
-        - `get_dataset(source)`: Returns a lazy `xarray.Dataset` (using Dask) for processing.
-
-### `model.py`
-- **`DatasetMetadata` (Class)**
-    - **Description**: A Pydantic model that acts as the source of truth for metadata validation. It defines all supported fields (Standard STAC + Custom extensions like `thumbnail_datetime`).
-
-### `thumbnails.py`
-- **`generate_thumbnail(...)`**
-    - **Description**: Generates PNG thumbnails from Xarray datasets.
-    - **Features**: Supports finding the nearest time slice to a target event (`target_datetime`) or falling back to the middle timestep.
-
-### `assets.py`
-- **`create_data_asset(...)`**
-    - **Description**: Helper to create `pystac.Asset` objects pointing to the physical Zarr data.
-    - **`process_example_notebook(...)`**: Converst and embeds example Jupyter notebooks as assets.
