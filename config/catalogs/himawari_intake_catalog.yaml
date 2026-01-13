@@ -1,0 +1,102 @@
+metadata:
+  # ============================================================================
+  # 1. GLOBAL CATALOG METADATA (REQUIRED for Grouping)
+  # ============================================================================
+  catalog_name: "HIMAWARI"
+  description: "Himawari-8/9 Cloud Property (CLP) Products"
+  
+  catalogs_keywords:
+    - "Cloud"
+    - "Satellite"
+  
+  version: 1
+
+sources:
+  # ============================================================================
+  # DATASET: Year 2023
+  # ============================================================================
+  himawri_clp_2023:
+    driver: zarr
+    description: "Himawari CLP L2 - 2023"
+    
+    args:
+      urlpath:
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_01_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_02_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_03_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_04_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_05_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_06_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_07_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_08_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_09_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_10_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_11_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2023_12_clp_5km.zarr
+      
+      combine: "by_coords"
+      combine_attrs: "drop_conflicts"
+      consolidated: False
+      
+    metadata:
+      # [1] Core Identity
+      id: "himawri_clp_2023"
+      collection_name: "Himawari-8/9 Cloud Property (CLP) - Year 2023"
+      category: "SATELLITE"
+      
+      # --- [2] Display & UI ---
+      description: |
+        **Himawari-8/9 Cloud Property (CLP) - Year 2023**
+        
+        High-resolution cloud products from the Himawari geostationary satellite, processed by JMA.
+        
+        - **Variables**: Cloud Top Temp (CLTT), Height (CLTH), Type (CLTYPE), Optical Thickness (CLOT)
+        - **Spatial**: Taiwan Region (20°N-27°N, 118°E-123.5°E) @ 5km
+        - **Temporal**: 10-minute intervals
+        
+      
+      keywords: ["himawari", "cloud", "CLP", "satellite", "taiwan"]
+
+      thumbnail_variable: "CLTT"
+      thumbnail_datetime: "2023-09-03T00:00:00"
+      
+      # --- [3] Scientific Context ---
+      provider: "Japan Meteorological Agency (JMA)"
+      platform: "Himawari-8/9"
+      processing_level: ["Level 2"]
+      
+      providers:
+        - name: "JMA"
+          roles: ["producer"]
+          url: "https://www.jma.go.jp/jma/indexe.html"
+
+  # ============================================================================
+  # DATASET: Year 2022 (Partial)
+  # ============================================================================
+  himawari_clp_2022:
+    driver: zarr
+    description: "Himawari CLP L2 - 2022 (Partial)"
+    
+    args:
+      urlpath:
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2022_01_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2022_03_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2022_04_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2022_05_clp_5km.zarr
+        - /home/sungche/NAS/dataset/himawari/CLP_zarr/2022_06_clp_5km.zarr
+      combine: "by_coords"
+      consolidated: False
+
+    metadata:
+      id: "himawri_clp_2022"
+      category: "SATELLITE"
+      description: |
+        **Himawari CLP - Year 2022 (Incomplete)**
+        
+        Partial dataset containing only 5 months. Some months were excluded due to data corruption.
+      
+      keywords: ["himawari", "partial"]
+      
+      providers:
+        - name: "JMA"
+          roles: ["producer"]

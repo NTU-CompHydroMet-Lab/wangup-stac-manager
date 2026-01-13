@@ -1,0 +1,121 @@
+metadata:
+  # ============================================================================
+  # 1. GLOBAL CATALOG METADATA
+  # ============================================================================
+  catalog_name: "ERA5"
+  description: "ECMWF ERA5 Reanalysis Data (Global & Regional)"
+  
+  catalogs_keywords:
+    - "Reanalysis"
+    - "ERA5"
+    - "Model"
+    - "ECMWF"
+    
+  version: 1
+  license: "Copernicus Climate Change Service (C3S)"
+
+sources:
+  # ============================================================================
+  # DATASET: ERA5 EAST ASIA (Rechunked / Optimized)
+  # ============================================================================
+  era5_east_asia:
+    driver: intake_xarray.xzarr.ZarrSource
+    description: "ERA5 East Asia Convection (Optimized)"
+    
+    args:
+      urlpath:
+        - '/home/sungche/NAS/dataset/era5_rechunked/era5_2019_10N40N_100E140E_rechunked.zarr'
+        - '/home/sungche/NAS/dataset/era5_rechunked/era5_2020_10N40N_100E140E_rechunked.zarr'
+        - '/home/sungche/NAS/dataset/era5_rechunked/era5_2021_10N40N_100E140E_rechunked.zarr'
+        - '/home/sungche/NAS/dataset/era5_rechunked/era5_2022_10N40N_100E140E_rechunked.zarr'
+        - '/home/sungche/NAS/dataset/era5_rechunked/era5_2023_10N40N_100E140E_rechunked.zarr'
+        
+      combine: "nested"
+      concat_dim: "time"
+      consolidated: true
+      chunks:
+        time: 360
+        level: 4
+        latitude: 121
+        longitude: 161
+
+    metadata:
+      # --- [1] Core Identity ---
+      id: "era5_east_asia"
+      collection_name: "ERA5 East Asia Reanalysis"
+      category: "REANALYSIS"
+      
+      # --- [2] Display & UI ---
+      description: |
+        **ERA5 East Asia Convection**
+        
+        High-resolution reanalysis data focused on convection and storm variables in East Asia.
+        Optimized for time-series analysis with cloud-friendly chunking.
+        
+        - **Spatial**: 10°N-40°N, 100°E-140°E
+        - **Temporal**: 2019-2023 (Hourly)
+        - **Resolution**: 0.25° x 0.25°
+        
+      
+      thumbnail_variable: "sea_surface_temperature" 
+      thumbnail_datetime: "2023-09-03T00:00:00"
+      
+      # --- [3] Scientific Context ---
+      institution: "ECMWF"
+      source: "ERA5 Reanalysis"
+      processing_level: ["analysis_ready"]
+      coordinate_system: "WGS84"
+      
+      "sci:citation": "Hersbach, H., et al. (2020). The ERA5 global reanalysis. QJRMS."
+      "sci:doi": "10.1002/qj.3803"
+
+      # --- [4] Providers ---
+      providers:
+        - name: "ECMWF"
+          roles: ["producer", "licensor"]
+          url: "https://www.ecmwf.int/"
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host"]
+          url: "https://wangup.caece.net/"
+
+  # ============================================================================
+  # DATASET: ERA5 GLOBAL (Raw / Archive)
+  # ============================================================================
+  era5_global_cj:
+    driver: intake_xarray.xzarr.ZarrSource
+    description: "ERA5 Global Convection (Raw Source)"
+    
+    args:
+      urlpath:
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2017_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2018_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2019_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2020_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2021_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2022_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2023_0p25deg_chunk.zarr'
+        - '/home/sungche/NAS/homes/cjchen-10025/download/era5/era5_convection_4_2024_0p25deg_chunk.zarr'
+      
+      combine: "nested"
+      concat_dim: "time"
+      consolidated: false
+      chunks:
+        time: 1
+        level: 4
+        latitude: 481
+        longitude: 1440
+
+    metadata:
+      id: "era5_global_cj"
+      category: "REANALYSIS"
+      
+      description: |
+        **ERA5 Global Convection (Raw Archive)**
+        
+        Full global subset (60S-60N). Note: Original chunking, performance may be slow for random access.
+        
+      keywords: ["era5", "global", "raw"]
+      
+      providers:
+        - name: "ECMWF"
+          roles: ["producer"]
