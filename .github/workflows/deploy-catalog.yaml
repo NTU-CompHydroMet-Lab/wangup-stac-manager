@@ -29,6 +29,12 @@ jobs:
           npm run build
           cd ..
 
+          # Debug: Check dist structure
+          echo "=== STAC Browser dist/ contents ==="
+          ls -la stac-browser/dist/
+          echo "=== Check for index.html ==="
+          find stac-browser/dist/ -name "index.html" || echo "index.html NOT FOUND"
+
       - name: Prepare Catalog for Deployment
         run: |
           # Use STAC Browser dist as base
