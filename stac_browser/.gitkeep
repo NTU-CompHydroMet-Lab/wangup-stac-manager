@@ -1,0 +1,16 @@
+# STAC Browser Directory
+
+This directory should contain the Radiant Earth STAC Browser.
+
+## Installation
+
+Download the STAC Browser:
+
+```bash
+git clone https://github.com/radiantearth/stac-browser.git stac_browser
+```
+
+Or download a specific release from:
+https://github.com/radiantearth/stac-browser/releases
+
+**Note**: This directory is gitignored. Download separately.

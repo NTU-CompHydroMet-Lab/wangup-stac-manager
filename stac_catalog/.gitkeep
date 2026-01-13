@@ -1,0 +1,16 @@
+# STAC Catalog Output Directory
+
+This directory will contain the generated STAC catalog after running:
+
+```bash
+uv run src/cli.py build
+```
+
+Generated files:
+- catalog.json (root catalog)
+- era5/ (ERA5 datasets)
+- himawari/ (Himawari datasets)
+- imerg/ (IMERG datasets)
+- qpesums/ (QPESUMS datasets)
+
+**Note**: This directory is gitignored. Do not commit generated files.
