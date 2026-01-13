@@ -15,7 +15,9 @@ import xarray as xr
 import shutil
 from loguru import logger
 
-import pystac
+from .utils import compute_extent, format_datetime, get_spatial_dims, fix_pacific_bbox
+from .model import DatasetMetadata
+
 import pystac
 import xstac
 import cf_xarray
@@ -24,7 +26,7 @@ from .base import StacGenerator
 
 
 class IntakeXarrayGenerator(StacGenerator):
-    """Generate a static STAC catalog from an Intake‑Xarray source.
+    """Generator for Intake-Xarray sources (NetCDF, Zarr).
 
     Parameters
     ----------
@@ -151,59 +153,47 @@ class IntakeXarrayGenerator(StacGenerator):
 
     def _enrich_collection_metadata(self, collection: pystac.Collection, ds: xr.Dataset) -> pystac.Collection:
         """Enrich collection metadata using xstac to extract datacube info."""
+        # Removed try-except for debugging
+        logger.info(f"ENTER _enrich_collection_metadata for {collection.id}")
+        
+        logger.info("Running xstac to extract rich metadata...")
+        
+        # xstac expects the template to be a pystac.Collection
+        kw = {"reference_system": "EPSG:4326"}
+        
+        # Use cf-xarray to detect dimensions
         try:
-            logger.info("Running xstac to extract rich metadata...")
-            
-            # xstac expects the template to be a pystac.Collection
-            # Since 'collection' passed in IS a pystac.Collection, we can use it directly?
-            # Actually, let's create a clone or just pass it in? 
-            # xstac modifies it or returns a new one? xstac.xarray_to_stac returns a NEW collection.
-            
-            kw = {"reference_system": "EPSG:4326"}
-            
-            # Use cf-xarray to detect dimensions
-            # 1. Temporal
-            if "time" in ds.cf.axes:
-                # If 'T' axis exists in axes
-                # Actually simpler: check coords names
-                pass 
-            
-            # Simpler approach manually with CF:
-            try:
-                if ds.cf["time"].name in ds.dims:
-                    kw["temporal_dimension"] = ds.cf["time"].name
-            except KeyError:
-                pass
+            if ds.cf["time"].name in ds.dims:
+                kw["temporal_dimension"] = ds.cf["time"].name
+        except KeyError:
+            pass
 
-            try:
-                if ds.cf["longitude"].name in ds.dims:
-                    kw["x_dimension"] = ds.cf["longitude"].name
-                elif ds.cf["X"].name in ds.dims:
-                     kw["x_dimension"] = ds.cf["X"].name
-            except KeyError:
-                pass
-                
-            try:
-                if ds.cf["latitude"].name in ds.dims:
-                    kw["y_dimension"] = ds.cf["latitude"].name
-                elif ds.cf["Y"].name in ds.dims:
-                    kw["y_dimension"] = ds.cf["Y"].name
-            except KeyError:
-                pass
+        try:
+            if ds.cf["longitude"].name in ds.dims:
+                kw["x_dimension"] = ds.cf["longitude"].name
+            elif ds.cf["X"].name in ds.dims:
+                    kw["x_dimension"] = ds.cf["X"].name
+        except KeyError:
+            pass
             
-            logger.debug(f"xstac config: {kw}")
+        try:
+            if ds.cf["latitude"].name in ds.dims:
+                kw["y_dimension"] = ds.cf["latitude"].name
+            elif ds.cf["Y"].name in ds.dims:
+                kw["y_dimension"] = ds.cf["Y"].name
+        except KeyError:
+            pass
+        
+        logger.debug(f"xstac config: {kw}")
 
-            # xstac returns a NEW collection object enriched with cube extensions
-            enriched = xstac.xarray_to_stac(ds, collection, **kw)
-            
-            # We want to return this enriched object
-            # Warning: xstac might reset some ID/Description details if not careful, 
-            # but we passed the full collection as template so it should be fine.
-            return enriched
-            
-        except Exception as e:
-            logger.warning(f"xstac enrichment failed: {e}")
-            return collection
+        # xstac returns a NEW collection object enriched with cube extensions
+        enriched = xstac.xarray_to_stac(ds, collection, **kw)
+        
+        # Check if we need to fix the BBox for Pacific-centered views (Antimeridian crossing)
+        fix_pacific_bbox(enriched, ds)
+        
+        return enriched
+
 
     def _enrich_item_metadata(self, item: pystac.Item, ds: xr.Dataset) -> pystac.Item:
         """Enrich item metadata using xstac to extract datacube info."""

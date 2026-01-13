@@ -27,4 +27,5 @@ dependencies = [
     "stac-validator>=3.10.2",
     "cf-xarray>=0.10.10",
     "beartype>=0.22.9",
+    "antimeridian>=0.4.5",
 ]

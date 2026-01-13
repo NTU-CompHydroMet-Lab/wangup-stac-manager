@@ -14,7 +14,7 @@ import xarray as xr
 import pystac
 
 # Import refactored modules
-from .utils import compute_extent, format_datetime, get_spatial_dims
+from .utils import compute_extent, format_datetime, get_spatial_dims, compute_item_geometry
 from .thumbnails import generate_thumbnail
 from .assets import process_example_notebook, create_data_asset
 from .model import DatasetMetadata
@@ -263,9 +263,12 @@ class StacGenerator(abc.ABC):
         collection_id = meta.get('id', 'generated_collection')
         item_id = f"{collection_id}-{year}"
         
+        # Compute Geometry (using antimeridian if needed)
+        geometry = compute_item_geometry(bbox)
+
         item = pystac.Item(
             id=item_id,
-            geometry=None, # We can add bbox geometry if needed
+            geometry=geometry, 
             bbox=bbox,
             datetime=mid_time,
             properties={
