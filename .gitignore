@@ -22,8 +22,9 @@ yarn-error.log*
 .idea/
 .vscode/
 
-# Optional: Ignore large generated outputs if desired, but keeping for demo
+# Generated STAC outputs (never commit these)
 stac_catalog/
+stac_output/
 
 # Documentation
 PRD.md
