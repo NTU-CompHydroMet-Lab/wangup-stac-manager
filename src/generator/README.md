@@ -36,8 +36,8 @@ The generator follows a pipeline approach:
 
 -   **`intake_xarray.py`**: The main driver for NetCDF/Zarr sources. Handles normalization (0-360 -> -180/180) and calls enrichment hooks.
 -   **`utils.py`**: Shared logic for:
-    -   `fix_pacific_bbox`: Detecting and fixing BBox for Pacific views.
-    -   `compute_item_geometry`: Generating valid split geometries.
+    -   `compute_extent`: Smart BBox calculation (detects Pacific view).
+    -   `compute_item_geometry`: Generating valid split geometries (using `antimeridian`).
     -   `get_spatial_dims`: Robust coordinate extraction.
 -   **`thumbnails.py`**: Visual generation.
 

@@ -166,6 +166,9 @@ class StacGenerator(abc.ABC):
         # _enrich_collection_metadata still takes collection (pystac) and ds.
         collection = self._enrich_collection_metadata(collection, ds)
         
+        # [NEW] Patch cube:dimensions to match unwrapped BBox (if applicable)
+        self._patch_cube_dimensions(collection)
+        
         # VALIDATE
         try:
             collection.validate()
@@ -177,6 +180,25 @@ class StacGenerator(abc.ABC):
         # Manually write using pystac structure
         self.collection_path.write_text(json.dumps(collection.to_dict(), indent=2))
         return collection
+        
+    def _patch_cube_dimensions(self, collection: pystac.Collection) -> None:
+        """Patch cube:dimensions to show unwrapped extent (e.g. 80 to 200) if West > East."""
+        if not collection.extent.spatial.bboxes:
+            return
+            
+        bbox = collection.extent.spatial.bboxes[0]
+        west, east = bbox[0], bbox[2]
+        
+        # Only patch if Antimeridian crossing (West > East) AND cube extension present
+        if west > east and "cube:dimensions" in collection.extra_fields:
+            cubes = collection.extra_fields["cube:dimensions"]
+            # Find longitude dim
+            for name in ["lon", "longitude", "x"]:
+                if name in cubes:
+                    if "extent" in cubes[name]:
+                        logger.info(f"Patching cube:dimensions.{name} to unwrapped [{west}, {east + 360}]")
+                        cubes[name]["extent"] = [west, east + 360]
+                    break
 
     def _write_collection(self, collection: pystac.Collection) -> None:
         self.collection_path.write_text(json.dumps(collection.to_dict(), indent=2))

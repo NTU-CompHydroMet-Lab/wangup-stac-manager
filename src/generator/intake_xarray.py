@@ -15,7 +15,7 @@ import xarray as xr
 import shutil
 from loguru import logger
 
-from .utils import compute_extent, format_datetime, get_spatial_dims, fix_pacific_bbox
+from .utils import format_datetime, get_spatial_dims
 from .model import DatasetMetadata
 
 import pystac
@@ -188,9 +188,6 @@ class IntakeXarrayGenerator(StacGenerator):
 
         # xstac returns a NEW collection object enriched with cube extensions
         enriched = xstac.xarray_to_stac(ds, collection, **kw)
-        
-        # Check if we need to fix the BBox for Pacific-centered views (Antimeridian crossing)
-        fix_pacific_bbox(enriched, ds)
         
         return enriched
 

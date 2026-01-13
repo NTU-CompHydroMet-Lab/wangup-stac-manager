@@ -27,3 +27,7 @@ stac_catalog/
 
 # Documentation
 PRD.md
+
+# Logs
+tests/logs/
+*.log

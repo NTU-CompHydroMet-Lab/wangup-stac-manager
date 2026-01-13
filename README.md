@@ -16,6 +16,7 @@ An **enterprise-grade, configuration-driven** pipeline to transform raw scientif
 *   **Intake Integration**: Uses [Intake](https://intake.readthedocs.io/) as the "Source of Truth" for dataset definitions.
 *   **Automated Thumbnails**: Generates representative maps from data variables, with configurable strategies (`middle` timestep, `max` projection, etc.).
 *   **Built-in Visualization**: Bundles a pre-configured **STAC Browser** for immediate local viewing.
+*   **Robust Geometry**: Automatically handles complex geospatial cases like **antimeridian crossing** (Pacific View) and **CF-convention** dimension detection.
 
 ---
 

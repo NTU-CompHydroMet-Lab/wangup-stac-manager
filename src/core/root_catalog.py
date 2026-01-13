@@ -80,14 +80,17 @@ def update_root_catalog(stac_output_dir: Path) -> None:
             old_col_dir = Path(col.self_href).parent
             if old_col_dir.parent == stac_output_dir and old_col_dir.name != group_name:
                 new_col_dir = group_dir / old_col_dir.name
-                if not new_col_dir.exists():
-                    try:
-                        shutil.move(str(old_col_dir), str(new_col_dir))
-                        logger.info(f"Moved {old_col_dir.name} to {group_name}/")
-                        # Update collection href to new location
-                        col.set_self_href(str(new_col_dir / "collection.json"))
-                    except Exception as e:
-                        logger.error(f"Failed to move {old_col_dir} to {new_col_dir}: {e}")
+                try:
+                    if new_col_dir.exists():
+                        logger.info(f"Removing stale collection directory: {new_col_dir}")
+                        shutil.rmtree(new_col_dir)
+                        
+                    shutil.move(str(old_col_dir), str(new_col_dir))
+                    logger.info(f"Moved {old_col_dir.name} to {group_name}/")
+                    # Update collection href to new location
+                    col.set_self_href(str(new_col_dir / "collection.json"))
+                except Exception as e:
+                    logger.error(f"Failed to move {old_col_dir} to {new_col_dir}: {e}")
 
             group_cat.add_child(col)
         
