@@ -94,10 +94,11 @@ jobs:
           test -f deploy/config.js && echo "✓ config.js exists" || (echo "✗ config.js MISSING" && exit 1)
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./deploy
-          publish_branch: gh-pages
-          force_orphan: true
-          commit_message: "Deploy catalog from ${{ github.ref_name }}"
+        run: |
+          cd deploy
+          git init
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -m "Deploy catalog from ${{ github.ref_name }}"
+          git push -f https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:gh-pages
