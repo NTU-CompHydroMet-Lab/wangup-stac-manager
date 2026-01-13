@@ -88,6 +88,9 @@ cd wangup-stac-manager
 
 # Install dependencies
 uv sync
+
+# Download STAC Browser (required for local viewing)
+git clone https://github.com/radiantearth/stac-browser.git stac_browser
 ```
 
 ### Basic Usage
