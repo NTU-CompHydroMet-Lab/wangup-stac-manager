@@ -15,10 +15,23 @@ jobs:
       
       - name: Prepare Catalog for Deployment
         run: |
-          # Copy pre-built catalog
+          # Use STAC Browser dist as base
           mkdir -p deploy
+          cp -r stac_browser/dist/* deploy/
+          
+          # Copy STAC catalog files into deploy root
           cp -r stac_catalog/* deploy/
-          cp -r stac_browser deploy/
+          
+          # Create config.js for STAC Browser
+          cat > deploy/config.js << 'EOF'
+          module.exports = {
+              catalogUrl: "./catalog.json",
+              catalogTitle: "NTU CompHydroMet Lab Data Catalog",
+              allowExternalAccess: true,
+              pathPrefix: "/wangup-stac-manager/",
+              historyMode: "hash"
+          };
+          EOF
           
           # Create public README
           cat > deploy/README.md << 'EOF'
@@ -26,7 +39,7 @@ jobs:
           
           **Public STAC catalog for research datasets**
           
-          Browse: [STAC Browser](./stac_browser/)
+          Visit: [STAC Browser](https://ntu-comphydromet-lab.github.io/wangup-stac-manager/)
           
           ## Available Datasets
           
