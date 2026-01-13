@@ -122,6 +122,10 @@ cd ..
 We provide a management script `start.sh` for common operations:
 
 ```bash
+# Build + Serve (One-step deployment)
+# Runs clean-build, then starts server if successful
+./start.sh build-serve
+
 # Start Server (Background via tmux)
 # Serves catalog at http://localhost:8001 (configurable in config/main.yaml)
 ./start.sh serve
@@ -130,9 +134,6 @@ We provide a management script `start.sh` for common operations:
 # Wipes stac_catalog/ and regenerates from scratch with parallel processing
 ./start.sh clean-build
 
-# Build + Serve (One-step deployment)
-# Runs clean-build, then starts server if successful
-./start.sh build-serve
 
 # Stop Background Server
 ./stop.sh

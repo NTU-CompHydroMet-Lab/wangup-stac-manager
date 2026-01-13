@@ -100,12 +100,12 @@
   "links": [
     {
       "rel": "self",
-      "href": "/home/sungche/stac/stac_catalog/QPESUMS_tw/items/QPESUMS_tw-2021.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/stac_catalog/QPESUMS_tw/items/QPESUMS_tw-2021.json",
       "type": "application/json"
     },
     {
       "rel": "root",
-      "href": "/home/sungche/stac/stac_catalog/QPESUMS_tw/collection.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/stac_catalog/QPESUMS_tw/collection.json",
       "type": "application/json",
       "title": "QPESUMS Radar Mosaics (Taiwan)"
     },
@@ -121,7 +121,7 @@
     },
     {
       "rel": "self",
-      "href": "/home/sungche/stac/QPESUMS_tw-2021.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/QPESUMS_tw-2021.json",
       "type": "application/json"
     }
   ],

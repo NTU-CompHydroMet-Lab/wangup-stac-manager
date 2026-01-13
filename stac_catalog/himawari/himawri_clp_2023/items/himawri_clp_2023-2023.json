@@ -70,11 +70,11 @@
     "platform": "Himawari-8/9",
     "variables": [
       "CLER_23",
-      "CLOT",
       "CLTT",
-      "CLTH",
       "CLTYPE",
-      "QA"
+      "QA",
+      "CLOT",
+      "CLTH"
     ],
     "cube:dimensions": {
       "time": {
@@ -132,32 +132,6 @@
           601
         ]
       },
-      "CLOT": {
-        "type": "data",
-        "description": "Cloud Optical Thickness",
-        "dimensions": [
-          "time",
-          "latitude",
-          "longitude"
-        ],
-        "unit": "Dimensionless",
-        "attrs": {
-          "long_name": "Cloud Optical Thickness",
-          "units": "Dimensionless",
-          "valid_max": 15000,
-          "valid_min": 0
-        },
-        "shape": [
-          51717,
-          2401,
-          2401
-        ],
-        "chunks": [
-          144,
-          601,
-          601
-        ]
-      },
       "CLTT": {
         "type": "data",
         "description": "Cloud Top Temperature",
@@ -170,32 +144,6 @@
         "attrs": {
           "long_name": "Cloud Top Temperature",
           "units": "K",
-          "valid_max": 20000,
-          "valid_min": 0
-        },
-        "shape": [
-          51717,
-          2401,
-          2401
-        ],
-        "chunks": [
-          144,
-          601,
-          601
-        ]
-      },
-      "CLTH": {
-        "type": "data",
-        "description": "Cloud Top Height",
-        "dimensions": [
-          "time",
-          "latitude",
-          "longitude"
-        ],
-        "unit": "km",
-        "attrs": {
-          "long_name": "Cloud Top Height",
-          "units": "km",
           "valid_max": 20000,
           "valid_min": 0
         },
@@ -263,6 +211,58 @@
           601,
           601
         ]
+      },
+      "CLOT": {
+        "type": "data",
+        "description": "Cloud Optical Thickness",
+        "dimensions": [
+          "time",
+          "latitude",
+          "longitude"
+        ],
+        "unit": "Dimensionless",
+        "attrs": {
+          "long_name": "Cloud Optical Thickness",
+          "units": "Dimensionless",
+          "valid_max": 15000,
+          "valid_min": 0
+        },
+        "shape": [
+          51717,
+          2401,
+          2401
+        ],
+        "chunks": [
+          144,
+          601,
+          601
+        ]
+      },
+      "CLTH": {
+        "type": "data",
+        "description": "Cloud Top Height",
+        "dimensions": [
+          "time",
+          "latitude",
+          "longitude"
+        ],
+        "unit": "km",
+        "attrs": {
+          "long_name": "Cloud Top Height",
+          "units": "km",
+          "valid_max": 20000,
+          "valid_min": 0
+        },
+        "shape": [
+          51717,
+          2401,
+          2401
+        ],
+        "chunks": [
+          144,
+          601,
+          601
+        ]
       }
     },
     "datetime": "2023-07-02T11:55:00Z"
@@ -270,12 +270,12 @@
   "links": [
     {
       "rel": "self",
-      "href": "/home/sungche/stac/stac_catalog/himawri_clp_2023/items/himawri_clp_2023-2023.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/stac_catalog/himawri_clp_2023/items/himawri_clp_2023-2023.json",
       "type": "application/json"
     },
     {
       "rel": "root",
-      "href": "/home/sungche/stac/stac_catalog/himawri_clp_2023/collection.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/stac_catalog/himawri_clp_2023/collection.json",
       "type": "application/json",
       "title": "Himawari-8/9 Cloud Property (CLP) - Year 2023"
     },
@@ -291,7 +291,7 @@
     },
     {
       "rel": "self",
-      "href": "/home/sungche/stac/himawri_clp_2023-2023.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/himawri_clp_2023-2023.json",
       "type": "application/json"
     }
   ],

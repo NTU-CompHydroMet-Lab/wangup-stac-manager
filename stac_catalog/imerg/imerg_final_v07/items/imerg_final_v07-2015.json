@@ -460,12 +460,12 @@
   "links": [
     {
       "rel": "self",
-      "href": "/home/sungche/stac/stac_catalog/imerg_final_v07/items/imerg_final_v07-2015.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/stac_catalog/imerg_final_v07/items/imerg_final_v07-2015.json",
       "type": "application/json"
     },
     {
       "rel": "root",
-      "href": "/home/sungche/stac/stac_catalog/imerg_final_v07/collection.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/stac_catalog/imerg_final_v07/collection.json",
       "type": "application/json",
       "title": "GPM IMERG Final Run (V07)"
     },
@@ -481,7 +481,7 @@
     },
     {
       "rel": "self",
-      "href": "/home/sungche/stac/imerg_final_v07-2015.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/imerg_final_v07-2015.json",
       "type": "application/json"
     }
   ],

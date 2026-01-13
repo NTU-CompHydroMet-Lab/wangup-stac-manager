@@ -45,3 +45,4 @@ stac_browser/
 .github/
 Dockerfile
 docker-compose.yml
+stac_catalog/*

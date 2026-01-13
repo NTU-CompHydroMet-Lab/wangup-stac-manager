@@ -460,12 +460,12 @@
   "links": [
     {
       "rel": "self",
-      "href": "/home/sungche/stac/stac_catalog/imerg_early_v07/items/imerg_early_v07-2021.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/stac_catalog/imerg_early_v07/items/imerg_early_v07-2021.json",
       "type": "application/json"
     },
     {
       "rel": "root",
-      "href": "/home/sungche/stac/stac_catalog/imerg_early_v07/collection.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/stac_catalog/imerg_early_v07/collection.json",
       "type": "application/json",
       "title": "GPM IMERG Early Run (V07)"
     },
@@ -481,7 +481,7 @@
     },
     {
       "rel": "self",
-      "href": "/home/sungche/stac/imerg_early_v07-2021.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/imerg_early_v07-2021.json",
       "type": "application/json"
     }
   ],

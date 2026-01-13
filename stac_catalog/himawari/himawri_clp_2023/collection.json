@@ -88,32 +88,6 @@
         601
       ]
     },
-    "CLOT": {
-      "type": "data",
-      "description": "Cloud Optical Thickness",
-      "dimensions": [
-        "time",
-        "latitude",
-        "longitude"
-      ],
-      "unit": "Dimensionless",
-      "attrs": {
-        "long_name": "Cloud Optical Thickness",
-        "units": "Dimensionless",
-        "valid_max": 15000,
-        "valid_min": 0
-      },
-      "shape": [
-        51717,
-        2401,
-        2401
-      ],
-      "chunks": [
-        144,
-        601,
-        601
-      ]
-    },
     "CLTT": {
       "type": "data",
       "description": "Cloud Top Temperature",
@@ -126,32 +100,6 @@
       "attrs": {
         "long_name": "Cloud Top Temperature",
         "units": "K",
-        "valid_max": 20000,
-        "valid_min": 0
-      },
-      "shape": [
-        51717,
-        2401,
-        2401
-      ],
-      "chunks": [
-        144,
-        601,
-        601
-      ]
-    },
-    "CLTH": {
-      "type": "data",
-      "description": "Cloud Top Height",
-      "dimensions": [
-        "time",
-        "latitude",
-        "longitude"
-      ],
-      "unit": "km",
-      "attrs": {
-        "long_name": "Cloud Top Height",
-        "units": "km",
         "valid_max": 20000,
         "valid_min": 0
       },
@@ -207,6 +155,58 @@
         "long_name": "Quality Assurance",
         "units": "Dimensionless",
         "valid_max": 65535,
+        "valid_min": 0
+      },
+      "shape": [
+        51717,
+        2401,
+        2401
+      ],
+      "chunks": [
+        144,
+        601,
+        601
+      ]
+    },
+    "CLOT": {
+      "type": "data",
+      "description": "Cloud Optical Thickness",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "Dimensionless",
+      "attrs": {
+        "long_name": "Cloud Optical Thickness",
+        "units": "Dimensionless",
+        "valid_max": 15000,
+        "valid_min": 0
+      },
+      "shape": [
+        51717,
+        2401,
+        2401
+      ],
+      "chunks": [
+        144,
+        601,
+        601
+      ]
+    },
+    "CLTH": {
+      "type": "data",
+      "description": "Cloud Top Height",
+      "dimensions": [
+        "time",
+        "latitude",
+        "longitude"
+      ],
+      "unit": "km",
+      "attrs": {
+        "long_name": "Cloud Top Height",
+        "units": "km",
+        "valid_max": 20000,
         "valid_min": 0
       },
       "shape": [

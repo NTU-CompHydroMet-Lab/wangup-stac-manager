@@ -547,12 +547,12 @@
   "links": [
     {
       "rel": "self",
-      "href": "/home/sungche/stac/stac_catalog/era5_east_asia/items/era5_east_asia-2021.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/stac_catalog/era5_east_asia/items/era5_east_asia-2021.json",
       "type": "application/json"
     },
     {
       "rel": "root",
-      "href": "/home/sungche/stac/stac_catalog/era5_east_asia/collection.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/stac_catalog/era5_east_asia/collection.json",
       "type": "application/json",
       "title": "ERA5 East Asia Reanalysis"
     },
@@ -568,7 +568,7 @@
     },
     {
       "rel": "self",
-      "href": "/home/sungche/stac/era5_east_asia-2021.json",
+      "href": "/home/NAS/homes/sungche-10024/stac/wangup-stac-manager/era5_east_asia-2021.json",
       "type": "application/json"
     }
   ],
