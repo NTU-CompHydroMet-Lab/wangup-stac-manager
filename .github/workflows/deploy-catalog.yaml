@@ -13,18 +13,27 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       
-      - name: Download and Setup STAC Browser
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build STAC Browser
         run: |
-          # Download latest STAC Browser release
-          STAC_BROWSER_VERSION="v3.4.0"
-          wget -q https://github.com/radiantearth/stac-browser/releases/download/${STAC_BROWSER_VERSION}/stac-browser-${STAC_BROWSER_VERSION}.zip
-          unzip -q stac-browser-${STAC_BROWSER_VERSION}.zip -d stac_browser_temp
+          # Clone STAC Browser
+          git clone --depth 1 --branch v3.4.0 https://github.com/radiantearth/stac-browser.git
+          cd stac-browser
+
+          # Install dependencies and build
+          npm install
+          npm run build
+          cd ..
 
       - name: Prepare Catalog for Deployment
         run: |
           # Use STAC Browser dist as base
           mkdir -p deploy
-          cp -r stac_browser_temp/* deploy/
+          cp -r stac-browser/dist/* deploy/
 
           # Copy STAC catalog files into deploy root
           cp -r stac_catalog/* deploy/
