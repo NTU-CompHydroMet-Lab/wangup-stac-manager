@@ -35,3 +35,6 @@ tests/logs/
 
 # Internal documentation (keep local, don't commit)
 docs/
+
+# STAC Browser (external dependency, download separately)
+stac_browser/
