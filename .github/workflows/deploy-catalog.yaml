@@ -12,6 +12,19 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Build STAC Browser
+        run: |
+          cd stac_browser
+          npm install
+          npm run build
       
       - name: Prepare Catalog for Deployment
         run: |
