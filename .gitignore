@@ -22,8 +22,8 @@ yarn-error.log*
 .idea/
 .vscode/
 
-# Generated STAC outputs (never commit these)
-stac_catalog/*
+# Generated STAC outputs - now tracked for deployment
+# stac_catalog/ is tracked
 stac_output/
 
 # Documentation
@@ -36,5 +36,13 @@ tests/logs/
 # Internal documentation (keep local, don't commit)
 docs/
 
-# STAC Browser (external dependency, download separately)
-stac_browser/*
+# STAC Browser - track dist/ only, ignore source
+stac_browser/src/
+stac_browser/public/
+stac_browser/node_modules/
+stac_browser/.*
+stac_browser/*.js
+stac_browser/*.json
+stac_browser/*.md
+stac_browser/docker/
+stac_browser/helpers/
