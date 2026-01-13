@@ -1,12 +1,12 @@
-# 系統架構與設念 (Architecture)
+# 系統架構 (Architecture)
 
-## 核心目的 (Purpose)
+## 核心目的 (Purposes)
 
-本專案旨在解決氣象資料格式繁雜（Zarr, NetCDF, HDF5, HDF4）與存取困難的問題。透過建立標準化的 **STAC (SpatioTemporal Asset Catalog)** 介面：
+本專案旨在解決氣象資料格式繁雜（Zarr, NetCDF, HDF5）與存取困難的問題。透過建立標準化的 **STAC (SpatioTemporal Asset Catalog)** 介面：
 
-1.  **統一存取層**：使用者無需關心底層檔案格式，統一透過 STAC API 查詢。
+1.  **統一存取層**：使用者無需關心底層檔案格式，統一透過 STAC API (或靜態 JSON) 查詢。
 2.  **自動化 ETL**：從 NAS 儲存層自動掃描並建立索引。
-3.  **時空資料立方 (Datacube)**：利用 `xstac` 擴充套件，自動提取變數、維度與解析度資訊。
+3.  **零複製 (Zero-Copy)**：僅建立 Metadata 索引與 Symlink，不複製 TB 級原始數據。
 
 ---
 
@@ -15,48 +15,57 @@
 ```mermaid
 graph TD
     A[NAS Storage] -->|Zarr/NetCDF/HDF| B(Intake Catalog *.yaml)
-    B -->|Load Data| C[StacGenerator]
-    C -->|Extract Metadata| D{xstac / Adapters}
-    D -->|Enrich Metadata| C
-    C -->|Generate JSON| E[stac_output/]
-    E -->|Validation| F[Root Catalog Generator]
-    F -->|Consolidate| G[catalog.json (Root)]
-    E -->|Serve| H[FastAPI Server]
-    H -->|View| I[STAC Browser]
+    B -->|Configuration| C[Core Builder]
+    C -->|Instantiate| D[StacGenerator]
+    
+    subgraph "ETL Process (Parallel)"
+    D -->|Extract Metadata| E{Normalization Logic}
+    E -->|Enrich| F{xstac}
+    F -->|Generate| G[Event Thumbnail]
+    G -->|Output| H[Collection/Items JSON]
+    end
+    
+    H -->|Update| I[Root Catalog (Grouping)]
+    I -->|Serve| J[FastAPI Server]
+    J -->|Visualize| K[STAC Browser]
 ```
 
 ---
 
 ## 核心組件 (Core Components)
 
-### 1. Data Source Definition (`catalogs/*.yaml`)
-- **角色**: Source of Truth (資料來源定義)。
-- **技術**: 使用 `Intake` 與 `intake-xarray`。
-- **功能**: 定義檔案位置、驅動程式 (Driver)、以及**人工維護的 Metadata** (如 License, Description, Keywords)。
+### 1. Configuration (`config/catalogs/*.yaml`)
+- **角色**: Single Source of Truth。
+- **技術**: Intake YAML 標準。
+- **Metadata 結構**: 採用 4-Tier 標準 (Identity, Display, Scientific, Providers)。
+- **關鍵欄位**: `collection_name` (標題), `catalog_name` (分組), `thumbnail_datetime` (事件時間)。
 
-### 2. Generator Logic (`src/generator/`)
-- **角色**: ETL 處理核心。
-- **職責**:
-    - **Iterate**: 遍歷所有定義的 Source。
-    - **Adapt**: 根據資料類型調用對應的 Adapter。
-    - **Enrich**: 呼叫 `xstac` 讀取實體檔案 (Zarr/NC) 以提取真實的時空範圍與變數資訊。
-    - **Output**: 生成符合 STAC Spec 的 JSON 檔案。
+### 2. Core Orchestration (`src/core/`)
+- **`builder.py`**: 負責解析 Intake Catalog 並分派平行任務。
+- **`root_catalog.py`**: 負責掃描生成的子目錄，並根據 `catalog_name` 自動建立階層式目錄結構 (Group Catalogs)。
+- **`validator.py`**: 整合 `stac-validator`，確保輸出的 JSON 符合 STAC 規範。
 
-### 3. Adapters (`src/adapters/`)
-不同的資料來源需要不同的處理策略，Adapter 模式負責將其統一轉為 STAC Item。
-
-- **`GriddedDataAdapter`**: 處理 Zarr/NetCDF 等網格資料。負責計算 Bounding Box, Time Interval，並決定 Item 的顆粒度 (如：一年一個 Item)。
-- **`CwaDataAdapter` (Planned)**: 處理氣象局測站資料 (CSV/DB)，將其轉換為 Feature Collection 或 Point Cloud 形式（視實作而定）。
+### 3. Generator Engine (`src/generator/`)
+- **`base.py` (Abstract)**: 定義 STAC 生成的生命週期 (Collection -> Items -> Assets)。
+- **`intake_xarray.py` (Impl)**: 針對 Xarray 可讀取的資料來源實作。
+    - **Normalization**: 自動處理 0-360 經度轉換為 -180/180。
+    - **Enrichment**: 使用 `xstac` 提取 Data Cube Extension 資訊。
+- **`thumbnails.py`**: 實作「事件導向」縮圖生成 (Nearest Neighbor Time Selection)。
+- **`assets.py`**: 處理 Zarr Symlink 與 Example Notebook 關聯。
 
 ---
 
 ## 關鍵技術決策
 
-### Item 顆粒度 (Granularity)
-- **現狀**: 預設採用「一年一個 Item」 (`{collection}-{year}`)。
-- **原因**: 避免產生過多細碎的 Item (如每小時一個檔案會產生數萬個 Item)，這對靜態 STAC Catalog 的瀏覽效能較好。
-- **例外**: 若資料集極大或需要高頻更新，架構上保留切換為「每月」或「每日」Item 的彈性。
+### 1. 靜態生成 (Static Generation)
+- **決策**: 不使用動態 Database (如 pgstac)，而是生成靜態 JSON 檔案。
+- **優勢**: 極致效能、易於部署 (CDN/S3)、零維護成本。
+- **限制**: 複雜搜尋 (Search API) 需由 Client 端實作或遍歷目錄。
 
-### Idempotency (冪等性)
-- 系統設計為可重複執行 (`build` command)。
-- Item ID 具備唯一性與可預測性 (Deterministic)，確保重新生成時不會產生重複或衝突的 ID。
+### 2. 事件導向視覺化 (Event-Based Visualization)
+- **決策**: 放棄統計平均圖 (Mean/Max)，改用特定災害事件 (如颱風) 的當下快照。
+- **優勢**: 讓使用者一眼就能看出資料的實際解析度與品質。
+
+### 3. 虛擬存取 (Virtual Access)
+- **決策**: 使用 Symlink 指向原始 NAS 數據。
+- **優勢**: 節省數 TB 空間，且確保數據來源唯一。

@@ -1,59 +1,72 @@
-# Source Code Documentation (`src/`)
+# Source Code Documentation
 
-This directory contains the core application logic for the STAC Catalog Generator and Server.
+This directory contains the application logic, separated into distinct layers of responsibility. Each sub-module contains its own detailed `README.md`.
+
+## Module Map
+
+| Module | Responsibility | Documentation |
+| :--- | :--- | :--- |
+| **[Core](core/README.md)** | Orchestration, Grouping, & Validation | [Read More](core/README.md) |
+| **[Generator](generator/README.md)** | ETL Logic, Metadata Extraction, & Asset Creation | [Read More](generator/README.md) |
+| **[Server](server/README.md)** | HTTP Gateway & Static File Serving | [Read More](server/README.md) |
+| **[Client](client/README.md)** | Python Interface for Users | [Read More](client/README.md) |
+
+## High-Level Architecture
+
+The application follows a linear control flow from Configuration -> CLI -> Core -> Generator -> Output.
+
+```mermaid
+graph TD
+    Config[Settings & YAML] --> CLI[CLI Entry Point]
+    CLI --> Core[Core Module]
+    
+    subgraph Core[src.core]
+        Builder --> Root[Root Catalog]
+        Builder --> Validator
+    end
+    
+    subgraph Generator[src.generator]
+        Builder -->|Invokes| Gen[StacGenerator]
+        Gen -->|Extracts| Meta[Metadata]
+        Gen -->|Creates| Assets[Thumbnails/Files]
+    end
+    
+    Core -->|Writes| Output[stac_catalog/]
+    
+    Output -.-> Server[src.server]
+    Output -.-> Client[src.client]
+```
 
 ## Directory Structure
 
-### 1. Root Modules
-- **`main.py`**: The CLI entrypoint. Uses `typer` to parse commands like `build` and `serve`. Orchestrates the overall workflow.
-- **`server.py`**: A FastAPI application that serves:
-    1. The Static Website (`static/stac-browser/dist`).
-    2. The Generated STAC Catalog (`stac_output/`).
-    3. The Data Files (via local symlinks or direct mounting).
+- **`cli.py`**: Main entry point (`typer` app).
+- **`settings.py`**: global configuration loader (`pystac`).
+- **`core/`**: business logic for orchestration.
+- **`generator/`**: implementation of the STAC generation logic.
+- **`server/`**: web server implementation.
+- **`client/`**: client library for users.
 
-### 2. `generator/` (Core Logic)
-This package handles the conversion of Intake Catalogs (YAML) into STAC JSON (Collection & Items).
+---
 
-- **`base.py`**: Contains `StacGenerator`, the abstract base class and orchestrator. It manages the lifecycle:
-    - Load Source -> Extract Metadata -> Compute Extent -> Generate Items -> Write JSON.
-- **`intake_xarray.py`**: The concrete implementation. It knows how to read `intake-xarray` sources and extract specific metadata (coords, time, variables).
-- **`utils.py`**: Pure helper functions for date formatting, spatial extent calculation, and dimension extraction.
-- **`thumbnails.py`**: Visualization logic. Uses `matplotlib` and `xarray` to generate PNG thumbnails from dataset variables.
-- **`assets.py`**: Asset management.
-    - Creates **Local Symlinks** to allow private NAS data to be served via HTTP.
-    - Handles Example Notebooks copying and linking.
+## Design Philosophy & Critical Assumptions
 
-### 3. `client/`
-- **`stac_client.py`**: (Optional) A Python client for interacting with the generated STAC API. *Currently minimal usage.*
+If you are contributing to this project, please understand the following core decisions that drive the architecture:
 
-## Architecture & Dependencies
+### 1. Configuration as Truth (The "No Database" Rule)
+We do **not** use a database (PostgreSQL/Mongo) to store metadata. The **Intake YAML files** in `config/catalogs/*.yaml` are the single source of truth.
+*   **Assumption**: Metadata updates happen via Git commits, not API calls.
+*   **Implication**: The Generator must parse these YAMLs strictly. If fields are missing (like `catalog_name`), the build should fail early.
 
-The following diagram illustrates how the components interact during the generation process:
+### 2. Static Generation (The "Serverless" Approach)
+We generate **static JSON files** rather than running a dynamic STAC API service.
+*   **Reasoning**: High performance, zero maintenance, and easy distribution (CDN/S3).
+*   **Constraint**: Dynamic features (like "search by polygon") are handled client-side or by traversing the static links, not by backend SQL queries.
 
-```
-```mermaid
-graph TD
-    CLI(main.py) -->|Calls| Script(scripts/generate_stac.py)
-    Server(server.py) -->|Serves| Output(stac_output/)
-    
-    Script -->|Instantiates| Gen(IntakeXarrayGenerator)
-    
-    Base(base.py: StacGenerator)
-    Gen -- Inherits --> Base
-    
-    Utils(utils.py)
-    Thumb(thumbnails.py)
-    Assets(assets.py)
-    
-    Base -->|Uses| Utils
-    Base -->|Calls| Thumb
-    Base -->|Calls| Assets
-    
-    NAS[(NAS Data)]
-    Assets -.->|Creates Symlink| NAS
-    Server -.->|Reads| NAS
-```
+### 3. Virtual Data Access (The "Zero-Copy" Rule)
+The generator does **not** copy the PB-scale Zarr files. It creates **Symlinks** or direct file references.
+*   **Critical Assumption**: The code runs on the same NAS/Filesystem where the data resides. Docker containers must strictly map volumes to match the host paths.
 
-## Key Design Decisions
-- **Symlink Strategy**: To keep data secure on the intranet, we do not copy TBs of data. Instead, we create lightweight symlinks in `stac_output/items/` that point to the real files on NAS. `server.py` serves these links transparently.
-- **Static Generation**: The catalog is "Static STAC" (just JSON files), making it extremely fast and cache-friendly. It does not require a database.
+### 4. Event-First Visualization
+We prioritize **Event-Based Thumbnails** (e.g., specific typhoons) over statistical averages.
+*   **Strategy**: The system prefers a specific timestamp (`thumbnail_datetime`) to showcase data quality during extreme events, rather than a muddy "mean" composite.
+
