@@ -9,55 +9,93 @@ from .utils import get_spatial_dims
 # Set non-interactive backend for matplotlib
 plt.switch_backend('Agg')
 
-def generate_thumbnail(ds: xr.Dataset, item_id: str, items_dir: Path, target_var: Optional[str] = None) -> Optional[Dict[str, object]]:
-    """Generate a simple map thumbnail (PNG) for the dataset."""
-    logger.info(f"Generating thumbnail for {item_id}...")
+import pystac
+
+def generate_thumbnail(
+    ds: xr.Dataset, 
+    item_id: str, 
+    items_dir: Path, 
+    target_var: Optional[str] = None,
+    target_datetime: Optional[str] = None
+) -> Optional[Dict[str, object]]:
+    """
+    Generate a simple map thumbnail (PNG) for the dataset.
+    
+    Args:
+        target_datetime: ISO8601 string (UTC). Picks nearest time. 
+                         If None, defaults to the middle timestep.
+    """
+    import pandas as pd
+    
+    logger.info(f"Generating thumbnail for {item_id} (time={target_datetime or 'middle'})...")
     try:
-        # 1. Select variable
-        if not target_var:
+        if not target_var or target_var not in ds.data_vars:
+            logger.warning(f"Target variable '{target_var}' not found in dataset. Skipping.")
             return None
             
-        if target_var not in ds.data_vars:
-            logger.warning(f"Targeted variable '{target_var}' not found in dataset. Skipping thumbnail.")
-            return None
-        
         var_name = target_var
+        da = ds[var_name]
         
-        # 2. Compute mean over time to get 2D field
+        # Select data based on Time
+        if "time" in ds.dims:
+            t_size = ds.sizes["time"]
+            
+            # 1. Event Time (Nearest)
+            if target_datetime:
+                try:
+                    dt = pd.to_datetime(target_datetime)
+                    da = da.sel(time=dt, method="nearest")
+                    actual_time = da.time.values
+                    logger.info(f"Detail thumbnail: {dt} -> {actual_time}")
+                except Exception as time_err:
+                    logger.warning(f"Failed to select target time {target_datetime}: {time_err}. Fallback to middle.")
+                    target_datetime = None 
+
+            # 2. Fallback (Middle)
+            if not target_datetime:
+                mid_idx = t_size // 2
+                da = da.isel(time=mid_idx)
+                logger.debug(f"Thumbnail using middle index: {mid_idx}")
+        
+        # Check validity
+        if da.isnull().all():
+            logger.warning(f"Thumbnail data for {item_id} is empty. Skipping.")
+            return None
+            
+        # Plot
         lon, lat = get_spatial_dims(ds)
         if lon is None or lat is None:
             return None
             
-        # Use max to ensure signal visibility and avoid blanks
-        if "time" in ds.dims:
-            da = ds[var_name].isel(time=slice(0, 48)).max(dim="time", keep_attrs=True)
-        else:
-            da = ds[var_name]
-            
-        # 3. Plot
         fig, ax = plt.subplots(figsize=(4, 4))
-        
-        # Explicitly specify x/y to ensure correct orientation
-        x_name = lon.name
-        y_name = lat.name
-        
-        # Use robust=True to handle outliers and scale colormap appropriately
-        da.plot(ax=ax, x=x_name, y=y_name, add_colorbar=False, add_labels=False, cmap='viridis', robust=True)
+        da.plot(
+            ax=ax, 
+            x=lon.name, 
+            y=lat.name, 
+            add_colorbar=False, 
+            add_labels=False, 
+            cmap='viridis', 
+            robust=True
+        )
         ax.set_axis_off()
         plt.tight_layout(pad=0)
         
-        # 4. Save
+        # Save
         thumb_name = f"{item_id}_thumb.png"
         thumb_path = items_dir / thumb_name
         plt.savefig(thumb_path, transparent=True, bbox_inches='tight', pad_inches=0)
         plt.close(fig)
         
+        # Return Asset Dict (Sender expects dict to create Asset, or we returned asset object?)
+        # Base.py currently expects a dict: pystac.Asset.from_dict(...)
+        # We can return the dict structure which is compatible.
         return {
             "href": f"./items/{thumb_name}",
             "type": "image/png",
             "roles": ["thumbnail"],
             "title": f"Thumbnail for {item_id}"
         }
+
     except Exception as e:
-        logger.error(f"Thumbnail generation failed for {item_id}: {e}")
+        logger.warning(f"Thumbnail generation failed: {e}")
         return None
