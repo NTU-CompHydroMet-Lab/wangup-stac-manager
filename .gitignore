@@ -23,7 +23,7 @@ yarn-error.log*
 .vscode/
 
 # Generated STAC outputs (never commit these)
-stac_catalog/
+stac_catalog/*
 stac_output/
 
 # Documentation
@@ -37,4 +37,4 @@ tests/logs/
 docs/
 
 # STAC Browser (external dependency, download separately)
-stac_browser/
+stac_browser/*
