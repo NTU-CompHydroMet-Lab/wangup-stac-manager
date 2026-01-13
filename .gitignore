@@ -2,7 +2,7 @@
 __pycache__/
 *.py[oc]
 build/
-dist/
+/dist/
 wheels/
 *.egg-info
 
@@ -22,8 +22,8 @@ yarn-error.log*
 .idea/
 .vscode/
 
-# Generated STAC outputs (never commit these)
-stac_catalog/
+# Generated STAC outputs - now tracked for deployment
+# stac_catalog/ is tracked
 stac_output/
 
 # Documentation
@@ -35,3 +35,13 @@ tests/logs/
 
 # Internal documentation (keep local, don't commit)
 docs/
+
+# STAC Browser - track dist/ only, ignore source
+# stac_browser/*
+stac_browser/
+# !stac_browser/dist/
+
+
+.github/
+Dockerfile
+docker-compose.yml

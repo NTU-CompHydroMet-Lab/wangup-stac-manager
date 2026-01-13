@@ -71,8 +71,8 @@
     "variables": [
       "CLER_23",
       "CLOT",
-      "CLTH",
       "CLTT",
+      "CLTH",
       "CLTYPE",
       "QA"
     ],
@@ -158,18 +158,18 @@
           601
         ]
       },
-      "CLTH": {
+      "CLTT": {
         "type": "data",
-        "description": "Cloud Top Height",
+        "description": "Cloud Top Temperature",
         "dimensions": [
           "time",
           "latitude",
           "longitude"
         ],
-        "unit": "km",
+        "unit": "K",
         "attrs": {
-          "long_name": "Cloud Top Height",
-          "units": "km",
+          "long_name": "Cloud Top Temperature",
+          "units": "K",
           "valid_max": 20000,
           "valid_min": 0
         },
@@ -184,18 +184,18 @@
           601
         ]
       },
-      "CLTT": {
+      "CLTH": {
         "type": "data",
-        "description": "Cloud Top Temperature",
+        "description": "Cloud Top Height",
         "dimensions": [
           "time",
           "latitude",
           "longitude"
         ],
-        "unit": "K",
+        "unit": "km",
         "attrs": {
-          "long_name": "Cloud Top Temperature",
-          "units": "K",
+          "long_name": "Cloud Top Height",
+          "units": "km",
           "valid_max": 20000,
           "valid_min": 0
         },

@@ -90,6 +90,33 @@ cd wangup-stac-manager
 uv sync
 ```
 
+#### STAC Browser Setup
+
+We no longer ship a pre-built browser bundle. Clone and build it locally so you can wire it to your freshly generated catalog:
+
+```bash
+# Fetch and build STAC Browser locally
+git clone https://github.com/radiantearth/stac-browser.git stac_browser
+cd stac_browser
+npm install
+
+# Point the browser to the FastAPI-mounted catalog before building
+cat <<'EOF' > public/config.js
+window.STAC_BROWSER_CONFIG = {
+  catalogUrl: "/stac/catalog.json",
+  catalogTitle: "NTU CompHydroMet Lab Data Catalog"
+};
+EOF
+
+# Ensure the runtime config loads before the Vue bundle
+perl -0pi -e 's#<!-- <script defer="defer" src="/config.js"></script> -->#<script defer src="/config.js"></script>#' public/index.html
+
+npm run build
+cd ..
+```
+
+> After each build, confirm `stac_browser/dist/config.js` still contains `/stac/catalog.json`. If `npm run build` is executed without the steps above, the UI will default to the public demo catalog.
+
 ### Basic Usage
 
 We provide a management script `start.sh` for common operations:
