@@ -67,6 +67,21 @@ def generate_thumbnail(
         if lon is None or lat is None:
             return None
             
+        # [Fix] Handle Dateline Wrapping for Pacific-centered data (e.g. Himawari)
+        # If we have data at both ends (-180, 180) but a gap at 0, unwrap to 0-360.
+        try:
+            lons = da[lon.name]
+            has_neg_edge = (lons < -90).any()
+            has_pos_edge = (lons > 90).any()
+            has_center = ((lons > -20) & (lons < 20)).any()
+            
+            if has_neg_edge and has_pos_edge and not has_center:
+                logger.info(f"Detected Pacific view for {item_id}. Unwrapping 0-360 for thumbnail.")
+                da = da.assign_coords({lon.name: (da[lon.name] % 360)})
+                da = da.sortby(lon.name)
+        except Exception as e:
+            logger.warning(f"Failed to unwrap coordinates: {e}")
+
         fig, ax = plt.subplots(figsize=(4, 4))
         da.plot(
             ax=ax, 

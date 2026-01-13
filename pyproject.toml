@@ -24,4 +24,7 @@ dependencies = [
     "matplotlib>=3.10.8",
     "loguru>=0.7.3",
     "pytest>=9.0.2",
+    "stac-validator>=3.10.2",
+    "cf-xarray>=0.10.10",
+    "beartype>=0.22.9",
 ]
