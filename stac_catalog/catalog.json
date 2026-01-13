@@ -1,0 +1,39 @@
+{
+  "type": "Catalog",
+  "id": "stac-root-catalog",
+  "stac_version": "1.1.0",
+  "description": "The [NTU CompHydroMet Lab](https://wangup.caece.net/) Data Catalog.\n\nSee also:\n- [Lab Website](https://wangup.caece.net/)\n- [GitHub Repository](https://github.com/NTU-CompHydroMet-Lab)\n",
+  "links": [
+    {
+      "rel": "root",
+      "href": "./catalog.json",
+      "type": "application/json",
+      "title": "NTU CompHydroMet Lab Data Catalog"
+    },
+    {
+      "rel": "child",
+      "href": "./himawari/catalog.json",
+      "type": "application/json",
+      "title": "HIMAWARI"
+    },
+    {
+      "rel": "child",
+      "href": "./imerg/catalog.json",
+      "type": "application/json",
+      "title": "IMERG"
+    },
+    {
+      "rel": "child",
+      "href": "./qpesums/catalog.json",
+      "type": "application/json",
+      "title": "QPESUMS"
+    },
+    {
+      "rel": "child",
+      "href": "./era5/catalog.json",
+      "type": "application/json",
+      "title": "ERA5"
+    }
+  ],
+  "title": "NTU CompHydroMet Lab Data Catalog"
+}

@@ -1,0 +1,139 @@
+{
+  "type": "Feature",
+  "stac_version": "1.1.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/datacube/v2.2.0/schema.json"
+  ],
+  "id": "QPESUMS_tw-2019",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          118.0,
+          20.0
+        ],
+        [
+          123.5,
+          20.0
+        ],
+        [
+          123.5,
+          27.0
+        ],
+        [
+          118.0,
+          27.0
+        ],
+        [
+          118.0,
+          20.0
+        ]
+      ]
+    ]
+  },
+  "bbox": [
+    118.0,
+    20.0,
+    123.5,
+    27.0
+  ],
+  "properties": {
+    "start_datetime": "2019-01-01T00:00:00Z",
+    "end_datetime": "2019-12-31T23:50:00Z",
+    "platform": "unknown",
+    "variables": [
+      "MaxDBZ"
+    ],
+    "cube:dimensions": {
+      "time": {
+        "extent": [
+          "2019-01-01T00:00:00Z",
+          "2019-12-31T23:50:00Z"
+        ],
+        "type": "temporal"
+      },
+      "longitude": {
+        "axis": "x",
+        "extent": [
+          118.0,
+          123.5
+        ],
+        "reference_system": "EPSG:4326",
+        "type": "spatial"
+      },
+      "latitude": {
+        "axis": "y",
+        "extent": [
+          20.0,
+          27.0
+        ],
+        "reference_system": "EPSG:4326",
+        "type": "spatial"
+      }
+    },
+    "cube:variables": {
+      "MaxDBZ": {
+        "type": "data",
+        "dimensions": [
+          "time",
+          "latitude",
+          "longitude"
+        ],
+        "attrs": {
+          "processing_notes": "QPESUMS \u539f\u59cb\u8cc7\u6599\u4e2d\u7684 NODATA_VALUE (<None) \u4fdd\u7559\u70ba\u539f\u59cb\u503c"
+        },
+        "shape": [
+          52075,
+          561,
+          441
+        ],
+        "chunks": [
+          1,
+          561,
+          441
+        ]
+      }
+    },
+    "datetime": "2019-07-02T11:55:00Z"
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "/home/sungche/stac/stac_catalog/QPESUMS_tw/items/QPESUMS_tw-2019.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "root",
+      "href": "/home/sungche/stac/stac_catalog/QPESUMS_tw/collection.json",
+      "type": "application/json",
+      "title": "QPESUMS Radar Mosaics (Taiwan)"
+    },
+    {
+      "rel": "collection",
+      "href": "../collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "/home/sungche/stac/QPESUMS_tw-2019.json",
+      "type": "application/json"
+    }
+  ],
+  "assets": {
+    "zarr": {
+      "href": "./QPESUMS_tw-2019.zarr",
+      "type": "application/vnd+zarr",
+      "title": "Data Store for QPESUMS_tw-2019",
+      "roles": [
+        "data"
+      ]
+    }
+  },
+  "collection": "QPESUMS_tw"
+}
