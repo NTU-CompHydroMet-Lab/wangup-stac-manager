@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  stac-server:
+    build: .
+    image: ntu-comphydro-stac:latest
+    container_name: stac-server
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      # Persist the generated catalog output
+      - ./stac_output:/app/stac_output
+
+      # MOUNT THE NAS (Crucial for Symlinks)
+      # Host Path : Container Path
+      # NOTE: For Podman on SELinux systems (RHEL/CentOS), you might need 'ro,z' 
+      # or 'ro,Z' to allow the container to read the host files.
+      # stac-server needs read access.
+      - /home/sungche/NAS:/home/sungche/NAS:ro
+
+    environment:
+      - LOG_LEVEL=INFO
+    # Podman specific: ensure user mapping if needed (often auto-handled)
+    # user: "1000:1000" 
+
+    # Optional: Add Nginx Proxy Manager if managed here, 
+    # but usually NPM is in its own stack.

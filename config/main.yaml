@@ -1,0 +1,37 @@
+project:
+  title: "NTU CompHydroMet Lab Data Catalog"
+  id: "stac-root-catalog"
+  description: |
+    The [NTU CompHydroMet Lab](https://wangup.caece.net/) Data Catalog.
+
+    See also:
+    - [Lab Website](https://wangup.caece.net/)
+    - [GitHub Repository](https://github.com/NTU-CompHydroMet-Lab)
+
+filesystem:
+  output_dir: "stac_catalog"
+  static_dir: "stac_browser"
+
+server:
+  host: "0.0.0.0"
+  port: 8001
+
+grouping:
+  strategy: "prefix"
+  separator: "_"
+
+concurrency:
+  max_workers: 5
+
+build:
+  targets:
+    - catalog: "config/catalogs/era5_intake_catalog.yaml"
+      source: "era5_east_asia"
+    - catalog: "config/catalogs/himawari_intake_catalog.yaml"
+      source: "himawri_clp_2023"
+    - catalog: "config/catalogs/imerg_intake_catalog.yaml"
+      source: "imerg_early_v07"
+    - catalog: "config/catalogs/imerg_intake_catalog.yaml"
+      source: "imerg_final_v07"
+    - catalog: "config/catalogs/radar_intake_catalog.yaml"
+      source: "QPESUMS_tw"

@@ -1,0 +1,80 @@
+metadata:
+  # ============================================================================
+  # 1. GLOBAL CATALOG METADATA (REQUIRED for Grouping)
+  # ============================================================================
+  catalog_name: "QPESUMS"
+  description: "Taiwan Weather Radar Network (QPESUMS) Maximum Reflectivity"
+  
+  catalogs_keywords:
+    - "Radar"
+    - "Precipitation"
+    - "Taiwan"
+  
+  version: 1
+  license: "Research Use"
+
+sources:
+  # ============================================================================
+  # DATASET: QPESUMS Radar
+  # ============================================================================
+  QPESUMS_tw:
+    driver: zarr
+    description: "QPESUMS Max Reflectivity (MaxDBZ)"
+    
+    args:
+      urlpath: 
+        - "/home/NAS/homes/cjchen-10025/data/QPSUMS/radar_data_2013.zarr"
+        - "/home/NAS/homes/cjchen-10025/data/QPSUMS/radar_data_2014.zarr"
+        - "/home/NAS/homes/cjchen-10025/data/QPSUMS/radar_data_2015.zarr"
+        - "/home/NAS/homes/cjchen-10025/data/QPSUMS/radar_data_2015.zarr"
+        - "/home/NAS/homes/cjchen-10025/data/QPSUMS/radar_data_2016.zarr"
+        - "/home/NAS/homes/cjchen-10025/data/QPSUMS/radar_data_2017.zarr"
+        - "/home/NAS/homes/cjchen-10025/data/QPSUMS/radar_data_2018.zarr"
+        - "/home/NAS/homes/cjchen-10025/data/QPSUMS/radar_data_2019.zarr"
+        - "/home/NAS/homes/cjchen-10025/data/QPSUMS/radar_data_2020.zarr"
+        - "/home/NAS/homes/cjchen-10025/data/QPSUMS/radar_data_2021.zarr"
+        - "/home/NAS/homes/cjchen-10025/data/QPSUMS/radar_data_2022.zarr"
+        - "/home/NAS/homes/cjchen-10025/data/QPSUMS/radar_data_2023.zarr"
+      combine: "by_coords"
+      combine_attrs: "drop_conflicts"
+      consolidated: True
+      
+    metadata:
+      # --- [1] Core Identity ---
+      id: "QPESUMS_tw"
+      collection_name: "QPESUMS Radar Mosaics (Taiwan)"
+      category: "RADAR"
+      
+      # --- [2] Display & UI ---
+      description: |
+        **Taiwan Weather Radar (QPESUMS)**
+        
+        Maximum reflectivity (MaxDBZ) composites from the Taiwan weather radar network.
+        
+        - **Spatial**: Taiwan Region (20°N-27°N, 118°E-123.5°E)
+        - **Temporal**: 10-minute intervals (2013-2023)
+        - **Variable**: MaxDBZ (Radar Reflectivity)
+        
+        Ideal for mesoscale convective system analysis and precipitation monitoring.
+      
+      keywords: ["radar", "taiwan", "MaxDBZ", "precipitation", "weather"]
+      
+      thumbnail_variable: "MaxDBZ"
+      thumbnail_datetime: "2023-09-03T00:00:00" # Typhoon Haikui
+      
+      # --- [3] Scientific Context ---
+      institution: "Central Weather Administration (CWA)"
+      source: "Weather Radar Network"
+      processing_level: ["analysis_ready"]
+      coordinate_system: "WGS84"
+      
+      "sci:citation": "Central Weather Administration (CWA), Taiwan. (2023). QPESUMS Radar Products."
+      
+      # --- [4] Providers ---
+      providers:
+        - name: "Central Weather Administration (CWA)"
+          roles: ["producer", "licensor"]
+          url: "https://www.cwa.gov.tw/"
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host"]
+          url: "https://wangup.caece.net/"

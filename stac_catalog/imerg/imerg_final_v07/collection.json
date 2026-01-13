@@ -1,0 +1,503 @@
+{
+  "type": "Collection",
+  "id": "imerg_final_v07",
+  "stac_version": "1.1.0",
+  "description": "**Integrated Multi-satellite Retrievals for GPM (IMERG) - Final Run**\n\nThe Final Run provides research-quality precipitation estimates by fusing data from the GPM constellation and calibrating with ground gauge networks.\n\n- **Temporal Resolution**: 30 minutes\n- **Spatial Resolution**: 0.1\u00b0 x 0.1\u00b0\n- **Latency**: ~3.5 months (post-processing)\n\nIdeal for historical analysis and climatology studies.\n",
+  "links": [
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "NTU CompHydroMet Lab Data Catalog"
+    },
+    {
+      "rel": "item",
+      "href": "./imerg_final_v07-2014/imerg_final_v07-2014.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./imerg_final_v07-2015/imerg_final_v07-2015.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./imerg_final_v07-2016/imerg_final_v07-2016.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "./imerg_final_v07-2023/imerg_final_v07-2023.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "IMERG"
+    }
+  ],
+  "stac_extensions": [
+    "https://stac-extensions.github.io/scientific/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/datacube/v2.2.0/schema.json"
+  ],
+  "sci:citation": "Huffman, G.J., et al. (2019). GPM-IMERG Final Precipitation L3 V06.",
+  "sci:doi": "10.5067/GPM/IMERG/3B-HH/06",
+  "group_id": "imerg",
+  "group_title": "IMERG",
+  "group_description": "Global Precipitation Measurement (IMERG) Data",
+  "group_keywords": [
+    "Satellite",
+    "Precipitation",
+    "NASA"
+  ],
+  "cube:dimensions": {
+    "time": {
+      "extent": [
+        "2014-01-01T00:00:00Z",
+        "2023-12-31T23:30:00Z"
+      ],
+      "type": "temporal"
+    },
+    "lon": {
+      "axis": "x",
+      "extent": [
+        -179.9499969482422,
+        179.9499969482422
+      ],
+      "reference_system": "EPSG:4326",
+      "type": "spatial"
+    },
+    "lat": {
+      "axis": "y",
+      "extent": [
+        -89.94999694824219,
+        89.94999694824219
+      ],
+      "reference_system": "EPSG:4326",
+      "type": "spatial"
+    }
+  },
+  "cube:variables": {
+    "IRinfluence": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "lon",
+        "lat"
+      ],
+      "attrs": {
+        "DimensionNames": "time,lon,lat",
+        "CodeMissingValue": "-9999",
+        "LongName": "\nRelative influence of infrared precipitation in the merged\n                        microwave-infrared precipitation estimate\n",
+        "origname": "IRinfluence",
+        "fullnamepath": "/Grid/Intermediate/IRinfluence"
+      },
+      "shape": [
+        70128,
+        3600,
+        1800
+      ],
+      "chunks": [
+        24,
+        1800,
+        900
+      ]
+    },
+    "IRprecipitation": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "lon",
+        "lat"
+      ],
+      "unit": "mm/hr",
+      "attrs": {
+        "DimensionNames": "time,lon,lat",
+        "Units": "mm/hr",
+        "units": "mm/hr",
+        "CodeMissingValue": "-9999.9",
+        "LongName": "Infrared precipitation estimate",
+        "origname": "IRprecipitation",
+        "fullnamepath": "/Grid/Intermediate/IRprecipitation"
+      },
+      "shape": [
+        70128,
+        3600,
+        1800
+      ],
+      "chunks": [
+        24,
+        1800,
+        900
+      ]
+    },
+    "lat_bnds": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "lat",
+        "latv"
+      ],
+      "unit": "degrees_north",
+      "attrs": {
+        "DimensionNames": "lat,latv",
+        "Units": "degrees_north",
+        "units": "degrees_north",
+        "origname": "lat_bnds",
+        "fullnamepath": "/Grid/lat_bnds"
+      },
+      "shape": [
+        70128,
+        1800,
+        2
+      ],
+      "chunks": [
+        1,
+        900,
+        2
+      ]
+    },
+    "lon_bnds": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "lon",
+        "lonv"
+      ],
+      "unit": "degrees_east",
+      "attrs": {
+        "DimensionNames": "lon,lonv",
+        "Units": "degrees_east",
+        "units": "degrees_east",
+        "origname": "lon_bnds",
+        "fullnamepath": "/Grid/lon_bnds"
+      },
+      "shape": [
+        70128,
+        3600,
+        2
+      ],
+      "chunks": [
+        1,
+        1800,
+        2
+      ]
+    },
+    "MWobservationTime": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "lon",
+        "lat"
+      ],
+      "attrs": {
+        "DimensionNames": "time,lon,lat",
+        "Units": "minutes",
+        "CodeMissingValue": "-9999",
+        "LongName": "\nObserved merged microwave observation time after\n                        dataset start time;  formerly HQobservationTime\n",
+        "origname": "MWobservationTime",
+        "fullnamepath": "/Grid/Intermediate/MWobservationTime"
+      },
+      "shape": [
+        70128,
+        3600,
+        1800
+      ],
+      "chunks": [
+        24,
+        1800,
+        900
+      ]
+    },
+    "MWprecipitation": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "lon",
+        "lat"
+      ],
+      "unit": "mm/hr",
+      "attrs": {
+        "DimensionNames": "time,lon,lat",
+        "Units": "mm/hr",
+        "units": "mm/hr",
+        "CodeMissingValue": "-9999.9",
+        "LongName": "Observed merged microwave precipitation estimate;\n                        formerly HQprecipitation",
+        "origname": "MWprecipitation",
+        "fullnamepath": "/Grid/Intermediate/MWprecipitation"
+      },
+      "shape": [
+        70128,
+        3600,
+        1800
+      ],
+      "chunks": [
+        24,
+        1800,
+        900
+      ]
+    },
+    "MWprecipSource": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "lon",
+        "lat"
+      ],
+      "attrs": {
+        "DimensionNames": "time,lon,lat",
+        "CodeMissingValue": "-9999",
+        "LongName": "Observed merged microwave satellite source;\n                        formerly HQprecipSource",
+        "origname": "MWprecipSource",
+        "fullnamepath": "/Grid/Intermediate/MWprecipSource"
+      },
+      "shape": [
+        70128,
+        3600,
+        1800
+      ],
+      "chunks": [
+        24,
+        1800,
+        900
+      ]
+    },
+    "precipitation": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "lon",
+        "lat"
+      ],
+      "unit": "mm/hr",
+      "attrs": {
+        "DimensionNames": "time,lon,lat",
+        "Units": "mm/hr",
+        "units": "mm/hr",
+        "CodeMissingValue": "-9999.9",
+        "LongName": "\nComplete merged microwave-infrared (gauge-adjusted)\n                        precipitation estimate;  formerly precipitationCal\n",
+        "origname": "precipitation",
+        "fullnamepath": "/Grid/precipitation"
+      },
+      "shape": [
+        70128,
+        3600,
+        1800
+      ],
+      "chunks": [
+        24,
+        1800,
+        900
+      ]
+    },
+    "precipitationQualityIndex": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "lon",
+        "lat"
+      ],
+      "attrs": {
+        "DimensionNames": "time,lon,lat",
+        "CodeMissingValue": "-9999.9",
+        "LongName": "\nPrecipitation quality index; qualitative indicator\n                        of skill based on the microwave-infrared merging process\n",
+        "origname": "precipitationQualityIndex",
+        "fullnamepath": "/Grid/precipitationQualityIndex"
+      },
+      "shape": [
+        70128,
+        3600,
+        1800
+      ],
+      "chunks": [
+        24,
+        1800,
+        900
+      ]
+    },
+    "precipitationUncal": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "lon",
+        "lat"
+      ],
+      "unit": "mm/hr",
+      "attrs": {
+        "DimensionNames": "time,lon,lat",
+        "Units": "mm/hr",
+        "units": "mm/hr",
+        "CodeMissingValue": "-9999.9",
+        "LongName": "Merged microwave-infrared \n                        precipitation estimate",
+        "origname": "precipitationUncal",
+        "fullnamepath": "/Grid/Intermediate/precipitationUncal"
+      },
+      "shape": [
+        70128,
+        3600,
+        1800
+      ],
+      "chunks": [
+        24,
+        1800,
+        900
+      ]
+    },
+    "probabilityLiquidPrecipitation": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "lon",
+        "lat"
+      ],
+      "unit": "percent",
+      "attrs": {
+        "DimensionNames": "time,lon,lat",
+        "Units": "percent",
+        "units": "percent",
+        "CodeMissingValue": "-9999",
+        "LongName": "\nProbability of liquid precipitation;  estimated with\n                        a diagnostic parameterization using ancillary data\n",
+        "origname": "probabilityLiquidPrecipitation",
+        "fullnamepath": "/Grid/probabilityLiquidPrecipitation"
+      },
+      "shape": [
+        70128,
+        3600,
+        1800
+      ],
+      "chunks": [
+        24,
+        1800,
+        900
+      ]
+    },
+    "randomError": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "lon",
+        "lat"
+      ],
+      "unit": "mm/hr",
+      "attrs": {
+        "DimensionNames": "time,lon,lat",
+        "Units": "mm/hr",
+        "units": "mm/hr",
+        "CodeMissingValue": "-9999.9",
+        "LongName": "\nRoot-mean-square error estimate for \n                        complete merged microwave-infrared (gauge-adjusted)\n                        precipitation\n",
+        "origname": "randomError",
+        "fullnamepath": "/Grid/randomError"
+      },
+      "shape": [
+        70128,
+        3600,
+        1800
+      ],
+      "chunks": [
+        24,
+        1800,
+        900
+      ]
+    },
+    "time_bnds": {
+      "type": "data",
+      "dimensions": [
+        "time",
+        "nv"
+      ],
+      "attrs": {
+        "DimensionNames": "time,nv",
+        "Units": "seconds since 1980-01-06 00:00:00 UTC",
+        "origname": "time_bnds",
+        "fullnamepath": "/Grid/time_bnds"
+      },
+      "shape": [
+        70128,
+        2
+      ],
+      "chunks": [
+        1,
+        2
+      ]
+    }
+  },
+  "title": "GPM IMERG Final Run (V07)",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -179.9499969482422,
+          -89.94999694824219,
+          179.9499969482422,
+          89.94999694824219
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2014-01-01T00:00:00Z",
+          "2023-12-31T23:30:00Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC-BY-4.0",
+  "keywords": [
+    "precipitation",
+    "GPM",
+    "global",
+    "research-quality",
+    "bias-corrected"
+  ],
+  "providers": [
+    {
+      "name": "NASA GES DISC",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://disc.gsfc.nasa.gov/"
+    },
+    {
+      "name": "NTU CompHydroMet Lab",
+      "roles": [
+        "host",
+        "processor"
+      ],
+      "url": "https://wangup.caece.net/"
+    }
+  ],
+  "summaries": {
+    "processing:level": [
+      "Level 3",
+      "Analysis Ready"
+    ],
+    "platform": [
+      "GPM Core Observatory"
+    ],
+    "category": [
+      "SATELLITE"
+    ]
+  },
+  "assets": {
+    "example_notebook": {
+      "href": "./examples/Read_IMERG_V07.ipynb",
+      "type": "application/x-ipynb+json",
+      "title": "Example Usage Notebook",
+      "roles": [
+        "example",
+        "docs"
+      ]
+    },
+    "thumbnail": {
+      "href": "./items/imerg_final_v07_thumb.png",
+      "type": "image/png",
+      "title": "Thumbnail for imerg_final_v07",
+      "roles": [
+        "thumbnail"
+      ]
+    }
+  }
+}

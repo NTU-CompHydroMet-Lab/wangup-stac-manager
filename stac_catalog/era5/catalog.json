@@ -1,0 +1,33 @@
+{
+  "type": "Catalog",
+  "id": "era5",
+  "stac_version": "1.1.0",
+  "description": "ECMWF ERA5 Reanalysis Data (Global & Regional)",
+  "links": [
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "NTU CompHydroMet Lab Data Catalog"
+    },
+    {
+      "rel": "child",
+      "href": "./era5_east_asia/collection.json",
+      "type": "application/json",
+      "title": "ERA5 East Asia Reanalysis"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "NTU CompHydroMet Lab Data Catalog"
+    }
+  ],
+  "keywords": [
+    "Reanalysis",
+    "ERA5",
+    "Model",
+    "ECMWF"
+  ],
+  "title": "ERA5"
+}

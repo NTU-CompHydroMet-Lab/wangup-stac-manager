@@ -1,0 +1,334 @@
+
+from __future__ import annotations
+
+import abc
+import json
+import shutil
+from pathlib import Path
+from typing import Dict, List, Optional
+import warnings
+from loguru import logger
+
+import pandas as pd
+import xarray as xr
+import pystac
+
+# Import refactored modules
+from .utils import compute_extent, format_datetime, get_spatial_dims, compute_item_geometry
+from .thumbnails import generate_thumbnail
+from .assets import process_example_notebook, create_data_asset
+from .model import DatasetMetadata
+
+
+class StacGenerator(abc.ABC):
+    """Base class that defines the workflow for generating a static STAC catalog."""
+
+    def __init__(self, output_dir: Path) -> None:
+        self.output_dir = output_dir
+        self.collection_path = self.output_dir / "collection.json"
+        self.items_dir = self.output_dir / "items"
+        self.items_dir.mkdir(parents=True, exist_ok=True)
+
+    # ------------------------------------------------------------------
+    # Abstract API – concrete implementations must provide these
+    # ------------------------------------------------------------------
+    @abc.abstractmethod
+    def load_source(self, source_name: str) -> object:
+        """Return the raw source object (e.g. an Intake entry)."""
+
+    @abc.abstractmethod
+    def extract_metadata(self, source: object) -> Dict[str, object]:
+        """Extract a dictionary of metadata from the source."""
+
+    @abc.abstractmethod
+    def get_dataset(self, source: object) -> xr.Dataset:
+        """Return an ``xarray.Dataset`` (lazy) for the source."""
+
+    def _enrich_collection_metadata(self, collection: pystac.Collection, ds: xr.Dataset) -> pystac.Collection:
+        """Hook to enrich collection metadata. Default implementation does nothing."""
+        return collection
+
+    def _enrich_item_metadata(self, item: pystac.Item, ds: xr.Dataset) -> pystac.Item:
+        """Hook to enrich item metadata. Default implementation does nothing."""
+        return item
+
+
+    # ------------------------------------------------------------------
+    # Helper methods
+    # ------------------------------------------------------------------
+    def _load_or_create_collection(self, meta: Dict[str, object], ds: xr.Dataset) -> pystac.Collection:
+        """Load an existing collection.json or create a minimal one.
+
+        ``meta`` is the metadata dict extracted from the source.
+        ``ds`` is used to compute the real extent.
+        """
+        # Validate metadata using Pydantic
+        # This will raise ValidationError if strict fields (id, description) are missing
+        meta_obj = DatasetMetadata(**meta)
+        
+        # utils.compute_extent now returns pystac.Extent
+        extent = compute_extent(ds)
+        
+        # Prepare Providers
+        providers = []
+        for p in meta_obj.providers:
+            providers.append(pystac.Provider(
+                name=p.name,
+                roles=p.roles,
+                url=p.url
+            ))
+
+        collection = pystac.Collection(
+            id=meta_obj.id,
+            title=meta_obj.get_title(),
+            description=meta_obj.description,
+            license=meta_obj.license,
+            extent=extent,
+            providers=providers,
+            keywords=meta_obj.keywords
+        )
+        
+        # --- Handle Summaries, Scientific Extension & Top-level Props ---
+        collection.summaries = pystac.Summaries({
+            "processing:level": meta_obj.processing_level,
+            "platform": [meta_obj.platform],
+            "category": [meta_obj.category],
+        })
+        
+        sci_ext_url = "https://stac-extensions.github.io/scientific/v1.0.0/schema.json"
+        
+        # Handle extra fields (passed through by Pydantic)
+        # We access the raw extra fields from the model
+        extra_fields = {}
+        for key, value in meta_obj.model_extra.items() if meta_obj.model_extra else {}:
+            if key.startswith("sci:"):
+                extra_fields[key] = value
+                if sci_ext_url not in collection.stac_extensions:
+                    collection.stac_extensions.append(sci_ext_url)
+            if key in ["terms_of_use", "gee:terms_of_use"]:
+                 extra_fields["terms_of_use"] = value
+        
+        if extra_fields:
+            collection.extra_fields.update(extra_fields)
+
+        # --- Grouping ID (For Root Catalog) ---
+        if meta_obj.group_id:
+            collection.extra_fields["group_id"] = meta_obj.group_id
+
+        if meta_obj.group_title:
+             collection.extra_fields["group_title"] = meta_obj.group_title
+
+        if meta_obj.group_description:
+             collection.extra_fields["group_description"] = meta_obj.group_description
+
+        if meta_obj.group_keywords:
+             collection.extra_fields["group_keywords"] = meta_obj.group_keywords
+
+        # --- Example Notebook Handling (Refactored) ---
+        if meta_obj.example_notebook:
+            logger.info(f"Processing example notebook: {meta_obj.example_notebook}")
+            nb_asset = process_example_notebook(meta_obj.example_notebook, self.output_dir)
+            if nb_asset:
+                collection.add_asset("example_notebook", nb_asset)
+
+        # --- Collection Thumbnail Generation (Refactored) ---
+        if meta_obj.thumbnail_path:
+            try:
+                src_thumb = Path(meta_obj.thumbnail_path)
+                if src_thumb.exists():
+                    logger.info(f"Using provided thumbnail: {src_thumb}")
+                    dest_thumb = self.items_dir / f"{collection.id}_thumb{src_thumb.suffix}"
+                    shutil.copy2(src_thumb, dest_thumb)
+                    
+                    collection.add_asset("thumbnail", pystac.Asset(
+                        href=f"./items/{dest_thumb.name}",
+                        media_type="image/png" if src_thumb.suffix == ".png" else "image/jpeg",
+                        roles=["thumbnail"],
+                        title=f"Thumbnail for {collection.id}"
+                    ))
+                else:
+                    logger.warning(f"Provided thumbnail path not found: {src_thumb}")
+            except Exception as e:
+                logger.error(f"Failed to copy provided thumbnail: {e}")
+        if meta_obj.thumbnail_variable:
+            thumb_asset_dict = generate_thumbnail(
+                ds, 
+                collection.id, 
+                self.items_dir, 
+                target_var=meta_obj.thumbnail_variable,
+                target_datetime=meta_obj.thumbnail_datetime
+            )
+            if thumb_asset_dict:
+                 collection.add_asset("thumbnail", pystac.Asset.from_dict(thumb_asset_dict))
+
+        # We pass the Pydantic object back to dict for legacy compatibility if needed, 
+        # or we just let _enrich continue working on the pystac object (which it does).
+        # _enrich_collection_metadata still takes collection (pystac) and ds.
+        collection = self._enrich_collection_metadata(collection, ds)
+        
+        # [NEW] Patch cube:dimensions to match unwrapped BBox (if applicable)
+        self._patch_cube_dimensions(collection)
+        
+        # VALIDATE
+        try:
+            collection.validate()
+        except pystac.STACValidationError as e:
+            logger.error(f"Collection validation failed: {e}")
+            raise
+
+        self.collection_path.parent.mkdir(parents=True, exist_ok=True)
+        # Manually write using pystac structure
+        self.collection_path.write_text(json.dumps(collection.to_dict(), indent=2))
+        return collection
+        
+    def _patch_cube_dimensions(self, collection: pystac.Collection) -> None:
+        """Patch cube:dimensions to show unwrapped extent (e.g. 80 to 200) if West > East."""
+        if not collection.extent.spatial.bboxes:
+            return
+            
+        bbox = collection.extent.spatial.bboxes[0]
+        west, east = bbox[0], bbox[2]
+        
+        # Only patch if Antimeridian crossing (West > East) AND cube extension present
+        if west > east and "cube:dimensions" in collection.extra_fields:
+            cubes = collection.extra_fields["cube:dimensions"]
+            # Find longitude dim
+            for name in ["lon", "longitude", "x"]:
+                if name in cubes:
+                    if "extent" in cubes[name]:
+                        logger.info(f"Patching cube:dimensions.{name} to unwrapped [{west}, {east + 360}]")
+                        cubes[name]["extent"] = [west, east + 360]
+                    break
+
+    def _write_collection(self, collection: pystac.Collection) -> None:
+        self.collection_path.write_text(json.dumps(collection.to_dict(), indent=2))
+
+    def _write_item(self, item: pystac.Item) -> None:
+        item_path = self.items_dir / f"{item.id}.json"
+        
+        # Ensure validation before writing
+        try:
+            item.validate()
+        except pystac.STACValidationError as e:
+            logger.warning(f"Item {item.id} validation failed: {e}")
+            raise
+
+        item_path.write_text(json.dumps(item.to_dict(), indent=2))
+
+    # ------------------------------------------------------------------
+    # Public entry point
+    # ------------------------------------------------------------------
+    def generate(self, source_name: str) -> None:
+        """Generate the collection and per‑year items for ``source_name``."""
+        source = self.load_source(source_name)
+        meta = self.extract_metadata(source)
+        ds = self.get_dataset(source)
+
+        # Cleanup
+        if self.items_dir.exists():
+            logger.info(f"Cleaning existing items: {self.items_dir}")
+            shutil.rmtree(self.items_dir)
+        self.items_dir.mkdir(parents=True, exist_ok=True)
+            
+        if self.collection_path.exists():
+            self.collection_path.unlink()
+        
+        # Ensure Collection ID
+        if "id" not in meta:
+            meta["id"] = source_name
+            
+        collection = self._load_or_create_collection(meta, ds)
+
+        # We manually manage the lists of links for the static catalog structure
+        # PySTAC can help, but for now let's just ensure the objects are valid.
+        
+        # Write collection immediately so items can validate against it
+        self._write_collection(collection)
+
+        years = sorted(set(pd.DatetimeIndex(ds.time.values).year))
+        for yr in years:
+            ds_year = ds.sel(time=str(yr))
+            item = self._make_item(ds_year, yr, meta)
+            
+            link = pystac.Link(
+                rel="item", 
+                target=f"./items/{item.id}.json", 
+                media_type="application/json"
+            )
+            collection.add_link(link)
+            
+            self._write_item(item)
+            logger.info(f"Generated Item for year {yr}")
+
+        self._write_collection(collection)
+        logger.info(f"Collection written to {self.collection_path}")
+
+    # ------------------------------------------------------------------
+    # Item creation
+    # ------------------------------------------------------------------
+    def _make_item(self, ds_year: xr.Dataset, year: int, meta: Dict[str, object], collection_obj: Optional[pystac.Collection] = None) -> pystac.Item:
+        lon, lat = get_spatial_dims(ds_year)
+        if lon is not None and lat is not None:
+            lon_min = float(lon.min())
+            lon_max = float(lon.max())
+            lat_min = float(lat.min())
+            lat_max = float(lat.max())
+            bbox = [lon_min, lat_min, lon_max, lat_max]
+        else:
+            bbox = [-180.0, -90.0, 180.0, 90.0]
+        
+        # PySTAC requires datetime objects
+        start = pd.to_datetime(ds_year.time.min().values)
+        end = pd.to_datetime(ds_year.time.max().values)
+        mid_time = start + (end - start) / 2
+        
+        collection_id = meta.get('id', 'generated_collection')
+        item_id = f"{collection_id}-{year}"
+        
+        # Compute Geometry (using antimeridian if needed)
+        geometry = compute_item_geometry(bbox)
+
+        item = pystac.Item(
+            id=item_id,
+            geometry=geometry, 
+            bbox=bbox,
+            datetime=mid_time,
+            properties={
+                "start_datetime": format_datetime(start),
+                "end_datetime": format_datetime(end),
+                "platform": meta.get("platform", "unknown"),
+                "variables": list(ds_year.data_vars),
+            },
+            collection=collection_id
+        )
+        
+        # Set absolute self href for validation resolution
+        item.set_self_href(str(self.items_dir / f"{item_id}.json"))
+
+        # --- Dynamic Asset Generation (Refactored) ---
+        source_path = ds_year.encoding.get("source")
+        if source_path:
+             # Store strict absolute path for user reference (e.g. Copy Path)
+             item.properties["source_path"] = str(source_path)
+             # create_data_asset returns pystac.Asset
+             data_asset = create_data_asset(source_path, item_id, self.items_dir)
+             item.add_asset("data", data_asset)
+        else:
+             # Fallback
+             item.add_asset("zarr", pystac.Asset(
+                href=f"./{item_id}.zarr",
+                media_type="application/vnd+zarr",
+                roles=["data"],
+                title=f"Data Store for {item_id}"
+             ))
+
+        # Add Links (Collection, Root)
+        # Using explicit links to match previous behavior for static browsing
+        item.add_link(pystac.Link(rel="root", target="../collection.json", media_type="application/json"))
+        item.add_link(pystac.Link(rel="collection", target="../collection.json", media_type="application/json"))
+        item.add_link(pystac.Link(rel="parent", target="../collection.json", media_type="application/json"))
+        item.add_link(pystac.Link(rel="self", target=f"./{item_id}.json", media_type="application/json"))
+
+        item = self._enrich_item_metadata(item, ds_year)
+        
+        return item

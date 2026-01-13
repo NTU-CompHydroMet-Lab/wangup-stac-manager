@@ -1,0 +1,119 @@
+metadata:
+  # ============================================================================
+  # 1. GLOBAL CATALOG METADATA (REQUIRED for Grouping)
+  # ============================================================================
+  catalog_name: "IMERG"          # Folder name: stac_catalog/imerg/
+  description: "Global Precipitation Measurement (IMERG) Data" # Group Catalog Description
+  
+  # Optional / Search Optimization
+  catalogs_keywords:
+    - "Satellite"
+    - "Precipitation"
+    - "NASA"
+  
+  version: 1
+  license: "NASA Open Data Policy"
+
+sources:
+  # ============================================================================
+  # DATASET: IMERG FINAL RUN (Silver Tier)
+  # ============================================================================
+  imerg_final_v07:
+    driver: zarr
+    description: "IMERG v07 Final Run (Analysis Ready)"
+    
+    # --------------------------------------------------------------------------
+    # A. DATA ACCESS (Intake Config)
+    # --------------------------------------------------------------------------
+    args:
+      urlpath: /home/NAS/homes/isaac-10009/Data/_silver_data/IMERG_V07/Final/*.zarr
+      consolidated: true
+
+    # --------------------------------------------------------------------------
+    # B. STAC METADATA (The "Website" Content)
+    # --------------------------------------------------------------------------
+    metadata:
+      # --- [1] Core Identity (REQUIRED) ---
+      id: "imerg_final_v07"
+      collection_name: "GPM IMERG Final Run (V07)"
+      category: "SATELLITE"
+      
+      # --- [2] Display & UI (RECOMMENDED) ---
+      description: |
+        **Integrated Multi-satellite Retrievals for GPM (IMERG) - Final Run**
+        
+        The Final Run provides research-quality precipitation estimates by fusing data from the GPM constellation and calibrating with ground gauge networks.
+        
+        - **Temporal Resolution**: 30 minutes
+        - **Spatial Resolution**: 0.1° x 0.1°
+        - **Latency**: ~3.5 months (post-processing)
+        
+        Ideal for historical analysis and climatology studies.
+      
+      keywords: ["precipitation", "GPM", "global", "research-quality", "bias-corrected"]
+      
+      
+      # Thumbnail Generation
+      thumbnail_variable: "precipitation"
+      thumbnail_datetime: "2023-09-03T00:00:00"  # Typhoon Haikui (Example)
+
+      # --- [3] Scientific Context (OPTIONAL) ---
+      source: "NASA GES DISC"
+      platform: "GPM Core Observatory"
+      processing_level: ["Level 3", "Analysis Ready"]
+      coordinate_system: "WGS84"
+      
+      "sci:citation": "Huffman, G.J., et al. (2019). GPM-IMERG Final Precipitation L3 V06."
+      "sci:doi": "10.5067/GPM/IMERG/3B-HH/06"
+
+      # --- [4] Providers & License (ADMIN) ---
+      providers:
+        - name: "NASA GES DISC"
+          roles: ["producer", "licensor"]
+          url: "https://disc.gsfc.nasa.gov/"
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"
+      
+      example_notebook: "/home/NAS/homes/isaac-10009/Data/_silver_data/IMERG_V07/Read_IMERG_V07.ipynb"
+
+  # ============================================================================
+  # DATASET: IMERG EARLY RUN (Real-time)
+  # ============================================================================
+  imerg_early_v07:
+    driver: zarr
+    description: "IMERG v07 Early Run (Low Latency)"
+    
+    args:
+      urlpath: /home/NAS/homes/isaac-10009/Data/_silver_data/IMERG_V07/Early/*.zarr
+      consolidated: true
+      
+    metadata:
+      # --- [1] Core Identity ---
+      id: "imerg_early_v07"
+      collection_name: "GPM IMERG Early Run (V07)"
+      category: "SATELLITE"
+      
+      # --- [2] Display & UI ---
+      description: |
+        **IMERG Early Run**
+        
+        Provisional precipitation estimates generated ~4 hours after observation. 
+        Note: This product uses only satellite inputs (no gauge calibration).
+        
+        **Usage Warning**: Suitable for real-time monitoring, but may contain higher errors than Final Run.
+      
+      keywords: ["precipitation", "near-real-time", "early-run", "flash-flood"]
+      
+      thumbnail_variable: "precipitation"
+      thumbnail_datetime: "2023-09-03T00:00:00" # Optional, defaults to middle
+
+      # --- [3] Scientific Context ---
+      platform: "GPM"
+      processing_level: ["Level 3"]
+      
+      # --- [4] Providers ---
+      providers:
+        - name: "NASA"
+          roles: ["producer"]
+          url: "https://gpm.nasa.gov/"

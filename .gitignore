@@ -1,0 +1,47 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+/dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+env/
+venv/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+.idea/
+.vscode/
+
+# Generated STAC outputs - now tracked for deployment
+# stac_catalog/ is tracked
+stac_output/
+
+# Documentation
+PRD.md
+
+# Logs
+tests/logs/
+*.log
+
+# Internal documentation (keep local, don't commit)
+docs/
+
+# STAC Browser - track dist/ only, ignore source
+# stac_browser/*
+stac_browser/
+# !stac_browser/dist/
+
+
+.github/
+Dockerfile
+docker-compose.yml
