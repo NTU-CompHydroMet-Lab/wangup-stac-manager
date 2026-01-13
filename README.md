@@ -32,30 +32,44 @@ This project is built on **three foundational strategies**:
 ## System Architecture
 
 ```mermaid
-graph LR
-    A[Intake YAML<br/>config/catalogs/] --> B[Builder<br/>src/core/builder.py]
-    B --> C[Generator<br/>src/generator/]
-    C --> D[STAC JSON<br/>stac_catalog/]
-    D --> E[STAC Browser<br/>Web UI]
+graph TB
+    A[Intake YAML<br/>config/catalogs/*.yaml] --> B[CLI Entry<br/>src/cli.py]
+    B --> C[Builder<br/>src/core/builder.py]
+    C --> D[Generator<br/>src/generator/intake_xarray.py]
     
-    C --> F[Thumbnails<br/>PNG previews]
-    C --> G[Symlinks<br/>Zero-copy data]
+    D --> E[Metadata Extraction<br/>utils.py]
+    D --> F[Thumbnail Generation<br/>thumbnails.py]
+    D --> G[STAC Objects<br/>base.py]
+    
+    E --> H[STAC Collection JSON]
+    F --> I[PNG Previews]
+    G --> H
+    
+    H --> J[Root Catalog Builder<br/>src/core/root_catalog.py]
+    J --> K[Hierarchical Catalog<br/>stac_catalog/]
+    
+    K --> L[FastAPI Server<br/>src/server/app.py]
+    L --> M[STAC Browser UI<br/>stac_browser/]
     
     style A fill:#e1f5ff
-    style D fill:#fff4e1
-    style E fill:#e8f5e9
+    style K fill:#fff4e1
+    style M fill:#e8f5e9
+    style D fill:#ffe1e1
 ```
 
 ### Directory Structure & Responsibilities
 
 | Directory | Role | Description |
 |:----------|:-----|:------------|
-| **`config/`** | **Control Plane** | User-editable YAML configs. Defines datasets, server settings, and build targets. |
-| **`src/core/`** | **Orchestration** | Parallel task scheduling (`builder.py`) and catalog hierarchy management (`root_catalog.py`). |
-| **`src/generator/`** | **ETL Engine** | Converts Xarray datasets to STAC Collections/Items. Handles geometry, thumbnails, and metadata enrichment. |
+| **`config/`** | **Control Plane** | User-editable YAML configs. Defines datasets (`catalogs/`), server settings, and build targets (`main.yaml`). |
+| **`src/cli.py`** | **Entry Point** | Typer-based CLI with commands: `build`, `serve`, `validate`. |
+| **`src/core/`** | **Orchestration** | Parallel task scheduling (`builder.py`), catalog hierarchy management (`root_catalog.py`), and validation (`validator.py`). |
+| **`src/generator/`** | **ETL Engine** | Converts Xarray datasets to STAC. Includes `intake_xarray.py` (driver), `utils.py` (geometry/extent), `thumbnails.py` (visualization), `base.py` (STAC object assembly). |
 | **`src/server/`** | **Web Server** | FastAPI app serving static STAC catalog + browser UI. |
+| **`src/settings.py`** | **Config Loader** | Pydantic models for `config/main.yaml` validation. |
 | **`stac_catalog/`** | **Output** | Generated static STAC JSON files (gitignored, deployed separately). |
 | **`stac_browser/`** | **UI Assets** | Pre-built Radiant Earth STAC Browser (static HTML/JS). |
+| **`tests/`** | **Test Suite** | Unit tests and debug scripts. |
 
 ---
 
@@ -83,17 +97,34 @@ We provide a management script `start.sh` for common operations:
 ```bash
 # Start Server (Background via tmux)
 # Serves catalog at http://localhost:8001 (configurable in config/main.yaml)
-./start.sh
+./start.sh serve
 
-# Build All Catalogs (Incremental)
-./start.sh build
-
-# Clean & Rebuild (Recommended for releases)
-# Wipes stac_catalog/ and regenerates from scratch
+# Clean & Rebuild (Recommended for production releases)
+# Wipes stac_catalog/ and regenerates from scratch with parallel processing
 ./start.sh clean-build
 
+# Build + Serve (One-step deployment)
+# Runs clean-build, then starts server if successful
+./start.sh build-serve
+
 # Stop Background Server
-./start.sh stop
+./stop.sh
+```
+
+**Alternative: Direct CLI Usage**
+
+```bash
+# Build specific catalog
+uv run src/cli.py build --catalog config/catalogs/himawari_intake_catalog.yaml
+
+# Build all catalogs in parallel
+uv run src/cli.py build --parallel
+
+# Start server (foreground)
+uv run src/cli.py serve --port 8001
+
+# Validate generated catalog
+uv run src/cli.py validate
 ```
 
 ---
@@ -236,21 +267,21 @@ See `src/generator/README.md` for a reference implementation.
 
 ## Project Roadmap
 
-### ✅ Phase 1: Foundation (Completed)
+### Phase 1: Foundation (Completed)
 - Configuration-driven architecture
 - Intake integration
 - Basic STAC generation
 
-### ✅ Phase 2: Robustness (v0.1.0-alpha)
+### Phase 2: Robustness (v0.1.0-alpha - Completed)
 - Antimeridian crossing support
 - CF-convention dimension detection
 - Comprehensive documentation
 
-### 🚧 Phase 3: Architecture Refactoring (v0.2.0)
+### Phase 3: Architecture Refactoring (v0.2.0 - Planned)
 - Decouple generator into `MetadataExtractor`, `GeometryHelper`, `StacFactory`
 - Simplify `intake_xarray.py` to pure orchestration
 
-### 📋 Phase 4: Advanced Features
+### Phase 4: Advanced Features (Future)
 - Web-based metadata editor
 - Code snippet generation for data access
 - CI/CD integration
