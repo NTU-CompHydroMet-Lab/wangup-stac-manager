@@ -32,3 +32,6 @@ PRD.md
 # Logs
 tests/logs/
 *.log
+
+# Internal documentation (keep local, don't commit)
+docs/
