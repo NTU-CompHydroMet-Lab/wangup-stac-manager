@@ -21,7 +21,7 @@ jobs:
       - name: Build STAC Browser
         run: |
           # Clone STAC Browser
-          git clone --depth 1 --branch v3.4.0 https://github.com/radiantearth/stac-browser.git
+          git clone --depth 1 --branch v3.3.5 https://github.com/radiantearth/stac-browser.git
           cd stac-browser
 
           # Install dependencies and build
