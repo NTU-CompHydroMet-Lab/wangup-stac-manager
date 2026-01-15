@@ -2,27 +2,57 @@ version: '3.8'
 
 services:
   stac-server:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: ntu-comphydro-stac:latest
     container_name: stac-server
     restart: unless-stopped
+
     ports:
       - "8001:8001"
-    volumes:
-      # Persist the generated catalog output
-      - ./stac_output:/app/stac_output
 
-      # MOUNT THE NAS (Crucial for Symlinks)
-      # Host Path : Container Path
-      # NOTE: For Podman on SELinux systems (RHEL/CentOS), you might need 'ro,z' 
-      # or 'ro,Z' to allow the container to read the host files.
-      # stac-server needs read access.
+    volumes:
+      # Persist generated catalog (container writes here)
+      - ./stac_catalog:/app/stac_catalog
+
+      # Mount configuration (editable from host)
+      - ./config:/app/config:ro
+
+      # MOUNT THE NAS DATA (CRITICAL for data access)
+      # Adjust paths according to your NAS mount location
+      # For SELinux systems (RHEL/CentOS), add ':z' or ':Z' flag if needed
+      - /home/NAS/homes/isaac-10009/Data:/home/NAS/homes/isaac-10009/Data:ro
       - /home/sungche/NAS:/home/sungche/NAS:ro
 
     environment:
       - LOG_LEVEL=INFO
-    # Podman specific: ensure user mapping if needed (often auto-handled)
-    # user: "1000:1000" 
+      - PYTHONUNBUFFERED=1
 
-    # Optional: Add Nginx Proxy Manager if managed here, 
-    # but usually NPM is in its own stack.
+    # Podman-specific: Run as host user to avoid permission issues
+    # Uncomment if using Podman with rootless mode
+    # user: "${UID:-1000}:${GID:-1000}"
+
+    # Resource limits (optional but recommended)
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+        reservations:
+          cpus: '2'
+          memory: 4G
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/stac/catalog.json"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# Optional: Add network configuration
+networks:
+  default:
+    name: stac-network
+    driver: bridge
