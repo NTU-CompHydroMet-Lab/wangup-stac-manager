@@ -1,6 +1,6 @@
 from __future__ import annotations
-from typing import List, Optional, Any, Dict
-from pydantic import BaseModel, Field, HttpUrl
+from typing import List, Optional, Any, Dict, Union
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 class ProviderModel(BaseModel):
     name: str
@@ -21,9 +21,16 @@ class DatasetMetadata(BaseModel):
     
     # STAC Specific mappings
     processing_level: List[str] = Field(
-        default_factory=lambda: ["bronze", "silver"], 
+        default_factory=lambda: ["bronze", "silver"],
         alias="processing:level"
     )
+
+    @field_validator("processing_level", mode="before")
+    @classmethod
+    def _wrap_processing_level(cls, v: Any) -> list:
+        if isinstance(v, str):
+            return [v]
+        return v
     platform: str = "unknown"
     category: str = "DATA"
     group_id: Optional[str] = None  # Explicit grouping ID (replaces auto-splitting)
