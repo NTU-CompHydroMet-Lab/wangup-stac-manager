@@ -22,6 +22,7 @@ class BuildSettings(BaseModel):
 class FilesystemSettings(BaseModel):
     output_dir: str = "stac_catalog"
     static_dir: str = "stac_browser"
+    link_strategy: str = "absolute"  # "absolute" or "relative"
 
 class ServerSettings(BaseModel):
     host: str = "0.0.0.0"

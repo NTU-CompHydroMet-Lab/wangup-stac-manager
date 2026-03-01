@@ -520,8 +520,12 @@ def build_event_collection(
     return event_collection
 
 
-def postprocess_event_collection_links(stac_output_dir: Path) -> None:
+def postprocess_event_collection_links(stac_output_dir: Path, strategy: str = "absolute") -> None:
     """Force event collection/item links to /stac absolute paths for browser routing compatibility."""
+    if strategy == "relative":
+        # PySTAC's SELF_CONTAINED mode already writes relative links.
+        return
+
     for event_col_path in stac_output_dir.rglob("collection.json"):
         try:
             payload = json.loads(event_col_path.read_text(encoding="utf-8"))

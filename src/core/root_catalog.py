@@ -174,6 +174,7 @@ def update_root_catalog(stac_output_dir: Path) -> None:
     # Keep explicit self_hrefs so event-based hierarchy is preserved.
     root.set_self_href(str(root_catalog_path))
     root.save(catalog_type=pystac.CatalogType.SELF_CONTAINED)
-    postprocess_event_collection_links(stac_output_dir)
+    strategy = settings.filesystem.link_strategy if settings else "absolute"
+    postprocess_event_collection_links(stac_output_dir, strategy=strategy)
 
     logger.info(f"Root Catalog written to {root_catalog_path}")
