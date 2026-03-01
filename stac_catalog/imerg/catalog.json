@@ -12,15 +12,15 @@
     },
     {
       "rel": "child",
-      "href": "./imerg_early_v07/collection.json",
-      "type": "application/json",
-      "title": "GPM IMERG Early Run (V07)"
-    },
-    {
-      "rel": "child",
       "href": "./imerg_final_v07/collection.json",
       "type": "application/json",
       "title": "GPM IMERG Final Run (V07)"
+    },
+    {
+      "rel": "child",
+      "href": "./imerg_early_v07/collection.json",
+      "type": "application/json",
+      "title": "GPM IMERG Early Run (V07)"
     },
     {
       "rel": "parent",

@@ -12,9 +12,15 @@
     },
     {
       "rel": "child",
-      "href": "./himawari/catalog.json",
+      "href": "./flood_modelling/catalog.json",
       "type": "application/json",
-      "title": "HIMAWARI"
+      "title": "Flood Modelling"
+    },
+    {
+      "rel": "child",
+      "href": "./era5/catalog.json",
+      "type": "application/json",
+      "title": "ERA5"
     },
     {
       "rel": "child",
@@ -30,9 +36,9 @@
     },
     {
       "rel": "child",
-      "href": "./era5/catalog.json",
+      "href": "./himawari/catalog.json",
       "type": "application/json",
-      "title": "ERA5"
+      "title": "HIMAWARI"
     }
   ],
   "title": "NTU CompHydroMet Lab Data Catalog"

@@ -1,0 +1,120 @@
+metadata:
+  catalog_name: "Flood Modelling"
+  description: "Event-based flood modelling products and validation-ready derivatives."
+  catalogs_keywords:
+    - "Flood"
+    - "Hydrodynamic Model"
+    - "Validation"
+    - "Event-based"
+  version: 1
+  license: "Internal Research Use"
+
+sources:
+  flood_event_20210604_rainfall_wgs84:
+    driver: intake_xarray.netcdf.NetCDFSource
+    description: "Rainfall forcing for flood event 2021-06-04 (WGS84)."
+    args:
+      urlpath: "data/flood_modelling_products/event_20210604/forcing/rainfall_wgs84.nc"
+      xarray_kwargs:
+        engine: netcdf4
+      chunks: {}
+    metadata:
+      id: "flood_event_20210604_rainfall_wgs84"
+      collection_name: "Flood Event 20210604 Rainfall Forcing (WGS84)"
+      category: "MODEL"
+      description: |
+        Rainfall forcing used by the flood modelling workflow for event 2021-06-04.
+        Derived from QPESUMS and exported as NetCDF in WGS84.
+      keywords: ["rainfall", "forcing", "event_20210604", "qpesums"]
+      source: "QPESUMS"
+      processing_level: ["Input", "Analysis Ready"]
+      coordinate_system: "WGS84"
+      event_id: "flood_event_20210604"
+      event_title: "Flood Event 20210604"
+      event_description: "Flood modelling products for event date 2021-06-04."
+      thumbnail_variable: "precipitation_observed"
+      providers:
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"
+
+  flood_event_20210604_depth_timeseries_zarr:
+    driver: zarr
+    description: "Core flood depth time-series products from FM model (Mesh2d/mesh1d)."
+    args:
+      urlpath: "data/flood_modelling_products/event_20210604/results/fm_map_core.zarr"
+      consolidated: true
+    metadata:
+      id: "flood_event_20210604_depth_timeseries_zarr"
+      collection_name: "Flood Event 20210604 Depth Time Series (Core Zarr)"
+      category: "MODEL"
+      description: |
+        Core model outputs converted to Zarr for efficient temporal/spatial access.
+        Includes:
+        - Mesh2d_waterdepth(time, Mesh2d_nFaces)
+        - mesh1d_waterdepth(time, mesh1d_nNodes)
+      keywords: ["flood", "waterdepth", "timeseries", "zarr", "event_20210604"]
+      source: "D-Flow FM"
+      processing_level: ["Model Output", "Analysis Ready"]
+      coordinate_system: "TWD97 / EPSG:3826"
+      event_id: "flood_event_20210604"
+      event_title: "Flood Event 20210604"
+      event_description: "Flood modelling products for event date 2021-06-04."
+      thumbnail_variable: "Mesh2d_waterdepth"
+      providers:
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"
+
+  flood_event_20210604_max_depth_faces:
+    driver: intake_xarray.netcdf.NetCDFSource
+    description: "Maximum water depth product derived from FM_model_map."
+    args:
+      urlpath: "data/flood_modelling_products/event_20210604/results/max_depth_faces.nc"
+      xarray_kwargs:
+        engine: netcdf4
+      chunks: {}
+    metadata:
+      id: "flood_event_20210604_max_depth_faces"
+      collection_name: "Flood Event 20210604 Maximum Depth (Faces)"
+      category: "MODEL"
+      description: |
+        Maximum flood depth derived by taking max over time for each 2D mesh face.
+      keywords: ["flood", "max_depth", "mesh2d", "event_20210604"]
+      source: "D-Flow FM"
+      processing_level: ["Model Output", "Derived Product"]
+      coordinate_system: "TWD97 / EPSG:3826"
+      event_id: "flood_event_20210604"
+      event_title: "Flood Event 20210604"
+      event_description: "Flood modelling products for event date 2021-06-04."
+      thumbnail_variable: "max_depth"
+      providers:
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"
+
+  flood_event_20210604_iot_validation_parquet:
+    driver: csv
+    description: "IoT validation timeseries (simulated vs observed flood depth)."
+    args:
+      urlpath: "data/flood_modelling_products/event_20210604/validation/iot_validation_timeseries_tidy.csv"
+    metadata:
+      id: "flood_event_20210604_iot_validation_parquet"
+      collection_name: "Flood Event 20210604 IoT Validation Time Series"
+      category: "OBSERVATION"
+      description: |
+        Station-based validation product containing paired simulated/observed flood depth timeseries.
+        This source is parquet-first for analytics-friendly access.
+      table_parquet_path: "data/flood_modelling_products/event_20210604/validation/iot_validation_timeseries.parquet"
+      keywords: ["flood", "iot", "validation", "timeseries", "event_20210604"]
+      source: "NTU CompHydroMet Lab IoT + D-Flow FM"
+      processing_level: ["Validation", "Analysis Ready"]
+      coordinate_system: "TWD97 / EPSG:3826"
+      event_id: "flood_event_20210604"
+      event_title: "Flood Event 20210604"
+      event_description: "Flood modelling products for event date 2021-06-04."
+      thumbnail_variable: "simulated_depth"
+      providers:
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"

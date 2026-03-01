@@ -1,7 +1,6 @@
-import json
 from pathlib import Path
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
 
 from src.settings import settings
 
@@ -14,6 +13,22 @@ from fastapi.staticfiles import StaticFiles
 # e.g. /stac/era5/collection.json
 stac_dir = Path(__file__).parent.parent.parent / settings.filesystem.output_dir
 app.mount("/stac", StaticFiles(directory=stac_dir, follow_symlink=True), name="stac")
+
+# Compatibility aliases for direct static-STAC paths:
+# - /catalog.json -> /stac/catalog.json
+# - /<group>/...  -> /stac/<group>/...
+@app.get("/catalog.json")
+async def root_catalog_alias():
+    return FileResponse(stac_dir / "catalog.json", media_type="application/json")
+
+if stac_dir.exists():
+    for child in sorted(stac_dir.iterdir()):
+        if child.is_dir():
+            app.mount(
+                f"/{child.name}",
+                StaticFiles(directory=child, follow_symlink=True),
+                name=f"stac-{child.name}",
+            )
 
 # Serve the STAC‑Browser UI (static files)
 # We mount the built 'dist' directory at the root.
