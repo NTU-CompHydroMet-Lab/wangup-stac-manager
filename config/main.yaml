@@ -25,6 +25,14 @@ concurrency:
 
 build:
   targets:
+    - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
+      source: "flood_event_20210604_rainfall_wgs84"
+    - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
+      source: "flood_event_20210604_depth_timeseries_zarr"
+    - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
+      source: "flood_event_20210604_max_depth_faces"
+    - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
+      source: "flood_event_20210604_iot_validation_parquet"
     - catalog: "config/catalogs/era5_intake_catalog.yaml"
       source: "era5_east_asia"
     - catalog: "config/catalogs/himawari_intake_catalog.yaml"
@@ -35,3 +43,14 @@ build:
       source: "imerg_final_v07"
     - catalog: "config/catalogs/radar_intake_catalog.yaml"
       source: "QPESUMS_tw"
+
+event_aggregation:
+  product_aliases:
+    - match: "rainfall"
+      alias: "rain_forcing"
+    - match: "max_depth"
+      alias: "max_depth"
+    - match: "depth_timeseries"
+      alias: "depth_timeseries"
+    - match: "iot_validation"
+      alias: "iot_timeseries"

@@ -12,12 +12,23 @@ from datetime import datetime, timezone
 from loguru import logger
 import pystac
 
-PRODUCT_ALIASES = [
+_DEFAULT_PRODUCT_ALIASES = [
     ("rainfall", "rain_forcing"),
     ("max_depth", "max_depth"),
     ("depth_timeseries", "depth_timeseries"),
     ("iot_validation", "iot_timeseries"),
 ]
+
+
+def get_product_aliases() -> list[tuple[str, str]]:
+    """Load product aliases from settings, falling back to defaults."""
+    try:
+        from src.settings import settings
+        if settings and settings.event_aggregation.product_aliases:
+            return [(e.match, e.alias) for e in settings.event_aggregation.product_aliases]
+    except Exception:
+        pass
+    return _DEFAULT_PRODUCT_ALIASES
 
 
 def resolve_href(base_file: Path, href: str) -> Path:
@@ -73,7 +84,7 @@ def asset_ext(path: Path) -> str:
 
 def product_alias(collection_id: str) -> str:
     lid = collection_id.lower()
-    for needle, alias in PRODUCT_ALIASES:
+    for needle, alias in get_product_aliases():
         if needle in lid:
             return alias
     return collection_id

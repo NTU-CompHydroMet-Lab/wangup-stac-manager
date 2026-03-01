@@ -35,6 +35,13 @@ class GroupingSettings(BaseModel):
 class ConcurrencySettings(BaseModel):
     max_workers: int = 5
 
+class ProductAliasEntry(BaseModel):
+    match: str
+    alias: str
+
+class EventAggregationSettings(BaseModel):
+    product_aliases: list[ProductAliasEntry] = Field(default_factory=list)
+
 class StacSettings(BaseModel):
     project: ProjectSettings
     build: BuildSettings
@@ -42,6 +49,7 @@ class StacSettings(BaseModel):
     server: ServerSettings = Field(default_factory=ServerSettings)
     grouping: GroupingSettings = Field(default_factory=GroupingSettings)
     concurrency: ConcurrencySettings = Field(default_factory=ConcurrencySettings)
+    event_aggregation: EventAggregationSettings = Field(default_factory=EventAggregationSettings)
 
 def load_settings() -> StacSettings:
     if not CONFIG_PATH.exists():
