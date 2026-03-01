@@ -1,0 +1,149 @@
+{
+  "manifest_version": "0.1.0",
+  "generated_at_utc": "2026-02-28T07:27:15.407352+00:00",
+  "event_id": "event_20210604",
+  "event_dir": "data/flood_modelling_20210604",
+  "core_products": [
+    {
+      "product_id": "forcing_rainfall",
+      "description": "Event rainfall forcing (WGS84).",
+      "source": {
+        "path": "data/flood_modelling_20210604/輸入雨量/WGS84/2021-06-04-0000~2021-06-08-0000QPESUMS.nc",
+        "role": "forcing",
+        "media_type": "application/netcdf",
+        "size_bytes": 102611280,
+        "modified_utc": "2026-02-27T13:54:40.519534+00:00"
+      },
+      "summary": {
+        "dataset_kind": "forcing_rainfall",
+        "extraction_ready": true,
+        "time_steps": 98,
+        "shape": [
+          98,
+          570,
+          450
+        ],
+        "variables": [
+          "precipitation_observed"
+        ],
+        "time_units": "minutes since 1970-01-01 08:00:00.0 +0800",
+        "time_start_raw": 27045600.0,
+        "time_end_raw": 27051420.0,
+        "crs": "EPSG:4326"
+      }
+    },
+    {
+      "product_id": "result_max_depth",
+      "description": "Maximum water depth derived from Mesh2d_waterdepth over time.",
+      "source": {
+        "path": "data/flood_modelling_20210604/輸出成果/output/FM_model_map.nc",
+        "role": "model_output",
+        "media_type": "application/netcdf",
+        "size_bytes": 23796183244,
+        "modified_utc": "2026-02-27T14:33:14.555267+00:00"
+      },
+      "summary": {
+        "dataset_kind": "result_max_depth",
+        "extraction_ready": true,
+        "derived_from": "Mesh2d_waterdepth(time, Mesh2d_nFaces)",
+        "derivation": "max_over_time_per_face",
+        "map_metadata": {
+          "source_file": "data/flood_modelling_20210604/輸出成果/output/FM_model_map.nc",
+          "crs": "EPSG:3826",
+          "shape": [
+            97,
+            2736630
+          ],
+          "time_steps": 97,
+          "face_count": 2736630,
+          "time_units": "seconds since 2021-06-04 00:00:00 +00:00",
+          "time_coverage_start": "2021-06-04T00:00:00+00:00",
+          "time_coverage_end": "2021-06-08T00:00:00+00:00"
+        }
+      }
+    },
+    {
+      "product_id": "result_depth_timeseries",
+      "description": "Water depth time series from Mesh2d/mesh1d.",
+      "source": {
+        "path": "data/flood_modelling_20210604/輸出成果/output/FM_model_map.nc",
+        "role": "model_output",
+        "media_type": "application/netcdf",
+        "size_bytes": 23796183244,
+        "modified_utc": "2026-02-27T14:33:14.555267+00:00"
+      },
+      "summary": {
+        "dataset_kind": "result_depth_timeseries",
+        "extraction_ready": true,
+        "variables": [
+          "Mesh2d_waterdepth",
+          "mesh1d_waterdepth"
+        ],
+        "map_metadata": {
+          "source_file": "data/flood_modelling_20210604/輸出成果/output/FM_model_map.nc",
+          "crs": "EPSG:3826",
+          "shape": [
+            97,
+            2736630
+          ],
+          "time_steps": 97,
+          "face_count": 2736630,
+          "time_units": "seconds since 2021-06-04 00:00:00 +00:00",
+          "time_coverage_start": "2021-06-04T00:00:00+00:00",
+          "time_coverage_end": "2021-06-08T00:00:00+00:00"
+        }
+      }
+    },
+    {
+      "product_id": "validation_iot",
+      "description": "IoT station points and simulation-observation comparison workbook.",
+      "sources": [
+        {
+          "path": "data/flood_modelling_20210604/IOT_catch/IOT_shpfile/YS_IOT.shp",
+          "role": "validation_points",
+          "media_type": "application/vnd.shp",
+          "size_bytes": 2564,
+          "modified_utc": "2026-02-27T13:54:04.765898+00:00"
+        },
+        {
+          "path": "data/flood_modelling_20210604/IOT_catch/20210604比對分析.xlsx",
+          "role": "validation_table",
+          "media_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "size_bytes": 694297,
+          "modified_utc": "2026-02-27T13:54:04.376809+00:00"
+        }
+      ],
+      "summary": {
+        "points": {
+          "dataset_kind": "validation_iot_points",
+          "extraction_ready": true,
+          "feature_count": 88,
+          "geometry": "Point",
+          "crs": "EPSG:3826",
+          "fields": [
+            "Name",
+            "x",
+            "y",
+            "field_4"
+          ]
+        },
+        "timeseries_table": {
+          "dataset_kind": "validation_iot_timeseries",
+          "extraction_ready": true,
+          "sheet_names": [
+            "20210604",
+            "門檻0",
+            "門檻0.1",
+            "confusion matrix"
+          ],
+          "required_labels_found": true
+        }
+      }
+    }
+  ],
+  "recommendations": [
+    "Keep only core products in STAC. Retain remaining model outputs as archive links.",
+    "Convert validation workbook to CSV/Parquet for stable downstream automation.",
+    "Consider transforming FM_model_map.nc into chunked Zarr for serving time-series queries."
+  ]
+}
