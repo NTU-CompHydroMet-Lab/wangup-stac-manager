@@ -19,6 +19,14 @@ _DEFAULT_PRODUCT_ALIASES = [
     ("iot_validation", "iot_timeseries"),
 ]
 
+# Display titles for event-level items, keyed by product alias.
+PRODUCT_TITLES: dict[str, str] = {
+    "rain_forcing": "輸入雨量",
+    "depth_timeseries": "水深時序列",
+    "max_depth": "最大淹水深度",
+    "iot_timeseries": "淹水感測器驗證",
+}
+
 
 def get_product_aliases() -> list[tuple[str, str]]:
     """Load product aliases from settings, falling back to defaults."""
@@ -186,11 +194,11 @@ def build_event_fusion_item(
         return a
 
     assets: dict[str, dict] = {}
-    depth_asset = _asset("depth_timeseries", "Simulated Depth Time Series (Mesh2d Zarr)", ["data", "simulation"])
+    depth_asset = _asset("depth_timeseries", "模擬水深時序列（Mesh2d Zarr）", ["data", "simulation"])
     if depth_asset:
         assets["depth_simulation"] = depth_asset
 
-    iot_asset = _asset("iot_timeseries", "IoT Validation Time Series (Parquet)", ["data", "observation", "validation"])
+    iot_asset = _asset("iot_timeseries", "淹水感測器驗證時序列（Parquet）", ["data", "observation", "validation"])
     if iot_asset:
         iot_asset["type"] = "application/vnd.apache.parquet"
         iot_asset["table:columns"] = [
@@ -209,11 +217,11 @@ def build_event_fusion_item(
         ]
         assets["depth_iot"] = iot_asset
 
-    rain_asset = _asset("rain_forcing", "Rainfall Forcing (NetCDF)", ["data", "forcing"])
+    rain_asset = _asset("rain_forcing", "輸入雨量（NetCDF）", ["data", "forcing"])
     if rain_asset:
         assets["rain_forcing"] = rain_asset
 
-    max_depth_asset = _asset("max_depth", "Maximum Flood Depth (NetCDF)", ["data", "derived"])
+    max_depth_asset = _asset("max_depth", "最大淹水深度（NetCDF）", ["data", "derived"])
     if max_depth_asset:
         assets["max_depth"] = max_depth_asset
 
@@ -300,6 +308,7 @@ def build_event_fusion_item(
         "geometry": bbox_to_polygon(bbox),
         "bbox": bbox,
         "properties": {
+            "title": "跨資產整合分析",
             "datetime": to_iso_utc_z(mid_dt),
             "start_datetime": to_iso_utc_z(start_dt),
             "end_datetime": to_iso_utc_z(end_dt),
@@ -335,21 +344,21 @@ def build_event_fusion_item(
         },
         "cube:variables": {
             "sim_depth_mesh": {
-                "description": "Model-simulated flood depth at mesh faces.",
+                "description": "網格面模擬淹水深度",
                 "unit": "m",
                 "type": "data",
                 "dimensions": ["time", "mesh2d_face"],
                 "fusion:asset_key": "depth_simulation",
             },
             "sim_depth_iot": {
-                "description": "Model-simulated flood depth sampled at IoT stations.",
+                "description": "IoT 測站位置之模擬淹水深度",
                 "unit": "m",
                 "type": "data",
                 "dimensions": ["time", "station"],
                 "fusion:asset_key": "depth_iot",
             },
             "obs_depth_iot": {
-                "description": "Observed IoT flood depth time series.",
+                "description": "IoT 測站觀測淹水深度時序列",
                 "unit": "m",
                 "type": "data",
                 "dimensions": ["time", "station"],
@@ -365,10 +374,10 @@ def build_event_fusion_item(
     }
 
     related_titles = {
-        "rain_forcing": "Rain Forcing Item",
-        "depth_timeseries": "Depth Time Series Item",
-        "max_depth": "Maximum Depth Item",
-        "iot_timeseries": "IoT Time Series Item",
+        "rain_forcing": "輸入雨量",
+        "depth_timeseries": "水深時序列",
+        "max_depth": "最大淹水深度",
+        "iot_timeseries": "淹水感測器驗證",
     }
     for alias, p in product_items.items():
         href = p.get("item_href")
@@ -460,6 +469,7 @@ def build_event_collection(
             src["properties"]["event_id"] = event_id
             src["properties"]["product_collection_id"] = col.id
             src["properties"]["product_key"] = alias
+            src["properties"]["title"] = col.title or PRODUCT_TITLES.get(alias, alias)
 
             # Re-link assets into event/items for stable browsing.
             new_assets = {}
@@ -479,7 +489,7 @@ def build_event_collection(
                     a = dict(asset)
                     a["href"] = f"/stac/{event_rel}/items/{new_name}"
                     if alias == "iot_timeseries":
-                        a["title"] = "IoT Validation Time Series (Parquet)"
+                        a["title"] = "淹水感測器驗證時序列（Parquet）"
                         a["type"] = "application/vnd.apache.parquet"
                         a["roles"] = ["data", "validation"]
                     new_assets[key] = a

@@ -292,10 +292,11 @@ class StacGenerator(abc.ABC):
 
         item = pystac.Item(
             id=item_id,
-            geometry=geometry, 
+            geometry=geometry,
             bbox=bbox,
             datetime=mid_time,
             properties={
+                "title": meta.get("collection_name", item_id),
                 "start_datetime": format_datetime(start),
                 "end_datetime": format_datetime(end),
                 "platform": meta.get("platform", "unknown"),
