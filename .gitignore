@@ -34,7 +34,7 @@ tests/logs/
 *.log
 
 # Internal documentation (keep local, don't commit)
-docs/
+docs/internal/
 data/
 
 # STAC Browser - track dist/ only, ignore source
