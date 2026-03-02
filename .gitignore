@@ -46,3 +46,7 @@ stac_browser/
 Dockerfile
 docker-compose.yml
 stac_catalog/*
+
+# Reports (local only)
+report/
+
