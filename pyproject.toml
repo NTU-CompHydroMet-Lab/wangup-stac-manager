@@ -28,4 +28,5 @@ dependencies = [
     "cf-xarray>=0.10.10",
     "beartype>=0.22.9",
     "antimeridian>=0.4.5",
+    "ipykernel>=7.1.0",
 ]

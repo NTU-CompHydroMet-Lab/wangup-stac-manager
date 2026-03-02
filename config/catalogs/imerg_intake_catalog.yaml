@@ -177,13 +177,13 @@ sources:
   # ============================================================================
   # DATASET: IMERG Return Periods
   # ============================================================================
-  imerg_monthly_return_periods:
-    driver: zarr
+  imerg_return_periods:
+    driver: netcdf
     description: "IMERG v07 Extreme Precipitation Return Periods (GEV Analysis)"
 
     args:
-      urlpath: /home/NAS/homes/isaac-10009/Data/_bronze_data/IMERG_v07_monthly/_misc_N_code/IMERG_v07_monthly_annual_max_gev_return_periods.nc
-      consolidated: true
+      urlpath: /home/NAS/homes/isaac-10009/Data/_bronze_data/IMERG_v07_Daily/_misc_N_code/IMERG_v07_daily_annual_max_gev_return_periods.nc
+      engine: h5netcdf
 
     metadata:
       # --- [1] Core Identity ---

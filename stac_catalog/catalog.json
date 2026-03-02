@@ -12,27 +12,27 @@
     },
     {
       "rel": "child",
-      "href": "./himawari/catalog.json",
-      "type": "application/json",
-      "title": "HIMAWARI"
-    },
-    {
-      "rel": "child",
       "href": "./imerg/catalog.json",
       "type": "application/json",
       "title": "IMERG"
     },
     {
       "rel": "child",
-      "href": "./qpesums/catalog.json",
+      "href": "./himawari/catalog.json",
       "type": "application/json",
-      "title": "QPESUMS"
+      "title": "HIMAWARI"
     },
     {
       "rel": "child",
       "href": "./era5/catalog.json",
       "type": "application/json",
       "title": "ERA5"
+    },
+    {
+      "rel": "child",
+      "href": "./qpesums/catalog.json",
+      "type": "application/json",
+      "title": "QPESUMS"
     }
   ],
   "title": "NTU CompHydroMet Lab Data Catalog"

@@ -69,12 +69,12 @@
     "end_datetime": "2023-12-31T23:50:00Z",
     "platform": "Himawari-8/9",
     "variables": [
-      "CLER_23",
-      "CLTT",
-      "CLTYPE",
-      "QA",
       "CLOT",
-      "CLTH"
+      "CLTT",
+      "CLER_23",
+      "CLTYPE",
+      "CLTH",
+      "QA"
     ],
     "cube:dimensions": {
       "time": {
@@ -106,19 +106,19 @@
       }
     },
     "cube:variables": {
-      "CLER_23": {
+      "CLOT": {
         "type": "data",
-        "description": "Cloud Effective Radius using band 6",
+        "description": "Cloud Optical Thickness",
         "dimensions": [
           "time",
           "latitude",
           "longitude"
         ],
-        "unit": "micro meter",
+        "unit": "Dimensionless",
         "attrs": {
-          "long_name": "Cloud Effective Radius using band 6",
-          "units": "micro meter",
-          "valid_max": 10000,
+          "long_name": "Cloud Optical Thickness",
+          "units": "Dimensionless",
+          "valid_max": 15000,
           "valid_min": 0
         },
         "shape": [
@@ -145,6 +145,32 @@
           "long_name": "Cloud Top Temperature",
           "units": "K",
           "valid_max": 20000,
+          "valid_min": 0
+        },
+        "shape": [
+          51717,
+          2401,
+          2401
+        ],
+        "chunks": [
+          144,
+          601,
+          601
+        ]
+      },
+      "CLER_23": {
+        "type": "data",
+        "description": "Cloud Effective Radius using band 6",
+        "dimensions": [
+          "time",
+          "latitude",
+          "longitude"
+        ],
+        "unit": "micro meter",
+        "attrs": {
+          "long_name": "Cloud Effective Radius using band 6",
+          "units": "micro meter",
+          "valid_max": 10000,
           "valid_min": 0
         },
         "shape": [
@@ -185,6 +211,32 @@
           601
         ]
       },
+      "CLTH": {
+        "type": "data",
+        "description": "Cloud Top Height",
+        "dimensions": [
+          "time",
+          "latitude",
+          "longitude"
+        ],
+        "unit": "km",
+        "attrs": {
+          "long_name": "Cloud Top Height",
+          "units": "km",
+          "valid_max": 20000,
+          "valid_min": 0
+        },
+        "shape": [
+          51717,
+          2401,
+          2401
+        ],
+        "chunks": [
+          144,
+          601,
+          601
+        ]
+      },
       "QA": {
         "type": "data",
         "description": "(2,1,0) Cloud Retrieval Algorithm Flag: 000=Outside of Scan, 001=No Cloud Mask, 010=Clear, 011=Failed, 100=Successful: Low Confidence, 101=Successful: High Confidence, 110=TBD, 111=TBD; (4,3) Cloud Mask Confidence Level Flag: 00=Clear, 01=Probably Clear, 10=Probably Cloudy, 11=Cloudy; (6,5) Cloud Retrieval Phase Flag: 00=Clear, 01=Liquid Water, 10=Mixed or Uncertain, 11=Ice; (7) Spare: 0=TBD, 1=TBD; (8) Sunglint Flag: 0=Yes, 1=No; (9) Snow Ice Background Possibility Flag: 0=Yes, 1=No; (11,10) Land/Water Flag: 00=Water, 01=Coastal, 10=TBD, 11=Land; (12) SOZ>80 or SAZ>70: 0=Yes, 1=No; (13) Subpixel Inhomogeneity Flag: 0=Yes, 1=No; (14) Multilayer Cloud Flag: 0=Yes, 1=No; (15) Inversion Layer Flag: 0=Yes, 1=No;",
@@ -199,58 +251,6 @@
           "long_name": "Quality Assurance",
           "units": "Dimensionless",
           "valid_max": 65535,
-          "valid_min": 0
-        },
-        "shape": [
-          51717,
-          2401,
-          2401
-        ],
-        "chunks": [
-          144,
-          601,
-          601
-        ]
-      },
-      "CLOT": {
-        "type": "data",
-        "description": "Cloud Optical Thickness",
-        "dimensions": [
-          "time",
-          "latitude",
-          "longitude"
-        ],
-        "unit": "Dimensionless",
-        "attrs": {
-          "long_name": "Cloud Optical Thickness",
-          "units": "Dimensionless",
-          "valid_max": 15000,
-          "valid_min": 0
-        },
-        "shape": [
-          51717,
-          2401,
-          2401
-        ],
-        "chunks": [
-          144,
-          601,
-          601
-        ]
-      },
-      "CLTH": {
-        "type": "data",
-        "description": "Cloud Top Height",
-        "dimensions": [
-          "time",
-          "latitude",
-          "longitude"
-        ],
-        "unit": "km",
-        "attrs": {
-          "long_name": "Cloud Top Height",
-          "units": "km",
-          "valid_max": 20000,
           "valid_min": 0
         },
         "shape": [
