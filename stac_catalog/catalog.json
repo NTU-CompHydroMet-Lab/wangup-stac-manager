@@ -38,7 +38,7 @@
       "rel": "child",
       "href": "./han_slope/catalog.json",
       "type": "application/json",
-      "title": "Han Slope"
+      "title": "坡地崩塌單元"
     }
   ],
   "title": "NTU CompHydroMet Lab Data Catalog"
