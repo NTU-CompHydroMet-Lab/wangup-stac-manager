@@ -7,7 +7,7 @@ Usage:
 - Converts each tiff to COG (unless --skip-cog)
 - Reads bbox/projection from each COG via rasterio
 - Converts AOI shapefile to GeoParquet
-- Outputs pystac Catalog > Catalog > Collection > 14 Items (1 asset each)
+- Outputs pystac Catalog > Catalog > Collection > 15 Items (14 COG + 1 AOI GeoParquet)
 """
 
 import json
@@ -345,7 +345,60 @@ def convert_shapefile_to_geoparquet(items_dir: Path) -> Path | None:
     return out_path
 
 
-def build_collection(asset_infos: dict, items: list[pystac.Item]) -> pystac.Collection:
+def build_aoi_item(parquet_path: Path, items_dir: Path) -> pystac.Item | None:
+    """Build a STAC Item for the AOI GeoParquet with actual shapefile geometry."""
+    import geopandas as gpd
+    from shapely.geometry import mapping
+
+    if parquet_path is None or not parquet_path.exists():
+        return None
+
+    gdf = gpd.read_parquet(str(parquet_path))
+    gdf_wgs84 = gdf.to_crs("EPSG:4326")
+    union_geom = gdf_wgs84.union_all()
+    bounds = gdf_wgs84.total_bounds  # [minx, miny, maxx, maxy]
+    bbox_wgs84 = [round(float(v), 6) for v in bounds]
+
+    item_id = f"{COLLECTION_ID}_aoi"
+    item = pystac.Item(
+        id=item_id,
+        geometry=mapping(union_geom),
+        bbox=bbox_wgs84,
+        datetime=DATA_DATETIME,
+        properties={
+            "datetime": DATA_DATETIME.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "title": "斜坡單元邊界（AOI）",
+            "description": "布唐布那溪流域坡地崩塌研究區域的斜坡單元邊界向量資料。",
+            "proj:code": "EPSG:3826",
+            "processing:level": "Analysis Ready",
+        },
+        stac_extensions=[PROJ_EXT],
+        collection=COLLECTION_ID,
+    )
+    item.add_asset(
+        "data",
+        pystac.Asset(
+            href=f"./{parquet_path.name}",
+            media_type=GEOPARQUET_MIME,
+            title="斜坡單元邊界 GeoParquet",
+            roles=["data"],
+            extra_fields={
+                "description": "布唐布那溪流域坡地崩塌研究區域的斜坡單元邊界（TWD97, EPSG:3826）。",
+                "proj:code": "EPSG:3826",
+            },
+        ),
+    )
+    item.add_link(pystac.Link(rel="root", target="../../../catalog.json", media_type="application/json"))
+    item.add_link(pystac.Link(rel="collection", target="../collection.json", media_type="application/json", title=COLLECTION_TITLE))
+    item.add_link(pystac.Link(rel="parent", target="../collection.json", media_type="application/json"))
+
+    item_path = items_dir / f"{item_id}.json"
+    item_path.write_text(json.dumps(item.to_dict(), indent=2, ensure_ascii=False))
+    logger.success(f"AOI item written: {item_path}")
+    return item
+
+
+def build_collection(asset_infos: dict, items: list[pystac.Item], parquet_path: Path | None = None) -> pystac.Collection:
     """Build and write the pystac.Collection."""
     shared_bbox = next(iter(asset_infos.values()))[1]["bbox_wgs84"]
 
@@ -383,10 +436,10 @@ def build_collection(asset_infos: dict, items: list[pystac.Item]) -> pystac.Coll
         "category": ["TERRAIN"],
     })
 
-    # Link to each of the 14 items
+    # Link to all items (14 COG + 1 AOI)
     for item in items:
-        asset_key = item.id[len(COLLECTION_ID) + 1:]  # strip "han_slope_landslide_"
-        zh_title = ITEM_META.get(asset_key, ("", ""))[0]
+        asset_key = item.id[len(COLLECTION_ID) + 1:]  # e.g. "slope", "aoi"
+        zh_title = ITEM_META.get(asset_key, ("", ""))[0] or item.properties.get("title", "")
         collection.add_link(pystac.Link(
             rel="item",
             target=f"./items/{item.id}.json",
@@ -410,8 +463,7 @@ def build_collection(asset_infos: dict, items: list[pystac.Item]) -> pystac.Coll
         ),
     )
 
-    # AOI boundary (GeoParquet)
-    parquet_path = convert_shapefile_to_geoparquet(items_dir)
+    # AOI boundary asset at collection level (same parquet as the AOI item)
     if parquet_path is not None:
         collection.add_asset(
             "boundary",
@@ -502,8 +554,14 @@ def main(
         logger.error("No assets found, aborting")
         raise typer.Exit(code=1)
 
+    parquet_path = convert_shapefile_to_geoparquet(items_dir)
+
     items = build_items(asset_infos, items_dir, skip_cog)
-    build_collection(asset_infos, items)
+    aoi_item = build_aoi_item(parquet_path, items_dir)
+    if aoi_item:
+        items.append(aoi_item)
+
+    build_collection(asset_infos, items, parquet_path)
     build_group_catalog()
     patch_root_catalog()
     logger.success(f"Done! {len(items)} items written.")
