@@ -1,19 +1,23 @@
 metadata:
   catalog_name: "淹水模擬"
-  description: "鹽水溪流域事件式淹水模擬產品與驗證衍生資料集。"
+  description: "本計畫中下游應用場景之淹水模擬產品，以 D-Flow FM 水理模型模擬鹽水溪流域之事件型淹水，並以 IoT 淹水感測器進行空間精度驗證。"
   catalogs_keywords:
     - "淹水"
-    - "水動力模型"
-    - "驗證"
-    - "事件式"
+    - "水理模型"
+    - "D-Flow FM"
     - "鹽水溪"
+    - "事件模擬"
+    - "IoT驗證"
+    - "中下游"
+    - "flood"
+    - "inundation"
   version: 1
   license: "Internal Research Use"
 
 sources:
   flood_event_20210604_rainfall_wgs84:
     driver: intake_xarray.netcdf.NetCDFSource
-    description: "2021-06-04 降雨事件輸入雨量（WGS84 座標系統）。"
+    description: "Gridded rainfall data for the 2021-06-04 flood event in WGS84 coordinate system."
     args:
       urlpath: "data/flood_modelling_products/event_20210604/forcing/rainfall_wgs84.nc"
       xarray_kwargs:
@@ -21,12 +25,12 @@ sources:
       chunks: {}
     metadata:
       id: "flood_event_20210604_rainfall_wgs84"
-      collection_name: "降雨事件 20210604 輸入雨量（WGS84）"
+      collection_name: "網格雨量資料"
       category: "MODEL"
       description: |
-        2021-06-04 淹水模擬工作流程使用之降雨驅動力。
-        來源為 QPESUMS 產製之時序列網格雨量檔案，轉換為 WGS84 座標之 NetCDF 格式。
-      keywords: ["降雨", "輸入雨量", "event_20210604", "QPESUMS", "鹽水溪"]
+        Time-series gridded rainfall data derived from QPESUMS weather radar products.
+        This dataset provides the meteorological forcing input for the flood simulation model.
+      keywords: ["precipitation", "rainfall", "meteorological forcing", "QPESUMS", "radar-derived", "gridded data", "model input"]
       source: "QPESUMS"
       processing_level: ["輸入資料", "分析就緒"]
       coordinate_system: "WGS84"
@@ -35,26 +39,26 @@ sources:
       event_description: "2021-06-04 鹽水溪流域淹水模擬產品。"
       thumbnail_variable: "precipitation_observed"
       providers:
-        - name: "臺大計算水文氣象實驗室"
+        - name: "臺北科技大學土木系"
           roles: ["host", "processor"]
           url: "https://wangup.caece.net/"
 
   flood_event_20210604_depth_timeseries_zarr:
     driver: zarr
-    description: "D-Flow FM 模型水深時序列核心輸出成果（Mesh2d/mesh1d）。"
+    description: "Time-series water depth data from hydrodynamic flood simulation on 1D/2D flexible mesh."
     args:
       urlpath: "data/flood_modelling_products/event_20210604/results/fm_map_core.zarr"
       consolidated: true
     metadata:
       id: "flood_event_20210604_depth_timeseries_zarr"
-      collection_name: "降雨事件 20210604 水深時序列（核心 Zarr）"
+      collection_name: "模擬水深時序列"
       category: "MODEL"
       description: |
-        FM_model_map.nc 主要輸出檔案轉換為 Zarr 格式，以利高效時空存取。
-        在每個輸出時間步儲存整個 1D/2D 網格的水位、水深等空間分佈，包含：
-        - Mesh2d_waterdepth(time, Mesh2d_nFaces)：2D 網格面之水深
-        - mesh1d_waterdepth(time, mesh1d_nNodes)：1D 網格節點之水深
-      keywords: ["淹水", "水深", "時序列", "zarr", "event_20210604", "鹽水溪"]
+        Spatially-distributed water depth at each model timestep across the entire computational domain.
+        The dataset includes:
+        - 2D mesh face water depths for overland flooding
+        - 1D mesh node water depths for channel flow
+      keywords: ["flood depth", "water depth", "inundation", "hydrodynamic simulation", "D-Flow FM", "flexible mesh", "1D/2D coupled", "map output", "time series"]
       source: "D-Flow FM"
       processing_level: ["模型輸出", "分析就緒"]
       coordinate_system: "TWD97 / EPSG:3826"
@@ -63,13 +67,13 @@ sources:
       event_description: "2021-06-04 鹽水溪流域淹水模擬產品。"
       thumbnail_variable: "Mesh2d_waterdepth"
       providers:
-        - name: "臺大計算水文氣象實驗室"
+        - name: "臺北科技大學土木系"
           roles: ["host", "processor"]
           url: "https://wangup.caece.net/"
 
   flood_event_20210604_max_depth_faces:
     driver: intake_xarray.netcdf.NetCDFSource
-    description: "由 FM_model_map 衍生之最大淹水深度產品。"
+    description: "Maximum flood depth reached during the event at each grid cell."
     args:
       urlpath: "data/flood_modelling_products/event_20210604/results/max_depth_faces.nc"
       xarray_kwargs:
@@ -77,12 +81,12 @@ sources:
       chunks: {}
     metadata:
       id: "flood_event_20210604_max_depth_faces"
-      collection_name: "降雨事件 20210604 最大淹水深度（網格面）"
+      collection_name: "最大淹水深度"
       category: "MODEL"
       description: |
-        對各 2D 網格面取時間最大值所得之最大淹水深度。
-        最大淹水相關數值輸出源自 FM_model_fou.nc。
-      keywords: ["淹水", "最大水深", "mesh2d", "event_20210604", "鹽水溪"]
+        Spatial map of the maximum water depth experienced at each location throughout the entire simulation period.
+        This product is useful for flood hazard assessment and identifying areas of greatest inundation risk.
+      keywords: ["flood depth", "maximum inundation", "flood extent", "statistical output", "D-Flow FM", "fourier analysis", "derived product"]
       source: "D-Flow FM"
       processing_level: ["模型輸出", "衍生產品"]
       coordinate_system: "TWD97 / EPSG:3826"
@@ -91,27 +95,26 @@ sources:
       event_description: "2021-06-04 鹽水溪流域淹水模擬產品。"
       thumbnail_variable: "max_depth"
       providers:
-        - name: "臺大計算水文氣象實驗室"
+        - name: "臺北科技大學土木系"
           roles: ["host", "processor"]
-          url: "https://wangup.caece.net/"
 
   flood_event_20210604_iot_validation_parquet:
     driver: csv
-    description: "淹水感測器觀測值與模型模擬值比對分析時序列。"
+    description: "Model validation dataset comparing simulated flood depths with in-situ sensor observations."
     args:
       urlpath: "data/flood_modelling_products/event_20210604/validation/iot_validation_timeseries_tidy.csv"
     metadata:
       id: "flood_event_20210604_iot_validation_parquet"
-      collection_name: "降雨事件 20210604 淹水感測器驗證時序列"
+      collection_name: "感測器比對資料"
       category: "OBSERVATION"
       description: |
-        測站式驗證產品，包含模擬值與觀測值配對之淹水深度時序列。
-        以感測器所在網格中心點為 Buffer 中心，向外延伸 25 公尺之 5x5 網格作為抓取範圍，
-        以最接近感測器觀測值之模型模擬值作為代表數值。
-        此資料來源以 Parquet 格式優先，便於分析存取。
+        Time-series comparison of observed versus simulated flood depths at IoT sensor locations.
+        Model values are extracted from a 5x5 grid (25m buffer) around each sensor location,
+        selecting the grid cell with values closest to observations.
+        This dataset enables quantitative assessment of model performance and accuracy.
       table_parquet_path: "data/flood_modelling_products/event_20210604/validation/iot_validation_timeseries.parquet"
-      keywords: ["淹水", "IoT感測器", "驗證", "時序列", "event_20210604", "鹽水溪"]
-      source: "臺大計算水文氣象實驗室 IoT + D-Flow FM"
+      keywords: ["flood depth", "in-situ measurement", "model validation", "IoT sensor", "point observation", "model-observation comparison", "performance metrics", "25m buffer"]
+      source: "臺北科技大學土木系 D-Flow FM +  CIoT"
       processing_level: ["驗證", "分析就緒"]
       coordinate_system: "TWD97 / EPSG:3826"
       event_id: "flood_event_20210604"
@@ -119,6 +122,234 @@ sources:
       event_description: "2021-06-04 鹽水溪流域淹水模擬產品。"
       thumbnail_variable: "simulated_depth"
       providers:
-        - name: "臺大計算水文氣象實驗室"
+        - name: "臺北科技大學土木系"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"
+
+  # ============================================================
+  # 降雨事件 20210805
+  # ============================================================
+  flood_event_20210805_rainfall_wgs84:
+    driver: intake_xarray.netcdf.NetCDFSource
+    description: "Gridded rainfall data for the 2021-08-05 flood event in WGS84 coordinate system."
+    args:
+      urlpath: "data/flood_modelling_products/event_20210805/forcing/rainfall_wgs84.nc"
+      xarray_kwargs:
+        engine: netcdf4
+      chunks: {}
+    metadata:
+      id: "flood_event_20210805_rainfall_wgs84"
+      collection_name: "降雨事件 20210805 輸入雨量（WGS84）"
+      category: "MODEL"
+      description: |
+        Time-series gridded rainfall data derived from QPESUMS weather radar products.
+        This dataset provides the meteorological forcing input for the flood simulation model.
+      keywords: ["precipitation", "rainfall", "meteorological forcing", "QPESUMS", "radar-derived", "gridded data", "model input"]
+      source: "QPESUMS"
+      processing_level: ["輸入資料", "分析就緒"]
+      coordinate_system: "WGS84"
+      event_id: "flood_event_20210805"
+      event_title: "降雨事件 20210805"
+      event_description: "2021-08-05 鹽水溪流域淹水模擬產品。"
+      thumbnail_variable: "precipitation_observed"
+      providers:
+        - name: "臺北科技大學土木系"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"
+
+  flood_event_20210805_depth_timeseries_zarr:
+    driver: zarr
+    description: "Time-series water depth data from hydrodynamic flood simulation on 1D/2D flexible mesh."
+    args:
+      urlpath: "data/flood_modelling_products/event_20210805/results/fm_map_core.zarr"
+      consolidated: true
+    metadata:
+      id: "flood_event_20210805_depth_timeseries_zarr"
+      collection_name: "降雨事件 20210805 水深時序列（核心 Zarr）"
+      category: "MODEL"
+      description: |
+        Spatially-distributed water depth at each model timestep across the entire computational domain.
+        The dataset includes:
+        - 2D mesh face water depths for overland flooding
+        - 1D mesh node water depths for channel flow
+      keywords: ["flood depth", "water depth", "inundation", "hydrodynamic simulation", "D-Flow FM", "flexible mesh", "1D/2D coupled", "map output", "time series"]
+      source: "D-Flow FM"
+      processing_level: ["模型輸出", "分析就緒"]
+      coordinate_system: "TWD97 / EPSG:3826"
+      event_id: "flood_event_20210805"
+      event_title: "降雨事件 20210805"
+      event_description: "2021-08-05 鹽水溪流域淹水模擬產品。"
+      thumbnail_variable: "Mesh2d_waterdepth"
+      providers:
+        - name: "臺北科技大學土木系"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"
+
+  flood_event_20210805_max_depth_faces:
+    driver: intake_xarray.netcdf.NetCDFSource
+    description: "Maximum flood depth reached during the event at each grid cell."
+    args:
+      urlpath: "data/flood_modelling_products/event_20210805/results/max_depth_faces.nc"
+      xarray_kwargs:
+        engine: netcdf4
+      chunks: {}
+    metadata:
+      id: "flood_event_20210805_max_depth_faces"
+      collection_name: "降雨事件 20210805 網格最大淹水深度"
+      category: "MODEL"
+      description: |
+        Spatial map of the maximum water depth experienced at each location throughout the entire simulation period.
+        This product is useful for flood hazard assessment and identifying areas of greatest inundation risk.
+      keywords: ["flood depth", "maximum inundation", "flood extent", "statistical output", "D-Flow FM", "fourier analysis", "derived product"]
+      source: "D-Flow FM"
+      processing_level: ["模型輸出", "衍生產品"]
+      coordinate_system: "TWD97 / EPSG:3826"
+      event_id: "flood_event_20210805"
+      event_title: "降雨事件 20210805"
+      event_description: "2021-08-05 鹽水溪流域淹水模擬產品。"
+      thumbnail_variable: "max_depth"
+      providers:
+        - name: "臺北科技大學土木系"
+          roles: ["host", "processor"]
+
+  flood_event_20210805_iot_validation_parquet:
+    driver: csv
+    description: "Model validation dataset comparing simulated flood depths with in-situ sensor observations."
+    args:
+      urlpath: "data/flood_modelling_products/event_20210805/validation/iot_validation_timeseries_tidy.csv"
+    metadata:
+      id: "flood_event_20210805_iot_validation_parquet"
+      collection_name: "降雨事件 20210805 淹水感測器驗證時序列"
+      category: "OBSERVATION"
+      description: |
+        Time-series comparison of observed versus simulated flood depths at IoT sensor locations.
+        Model values are extracted from a 5x5 grid (25m buffer) around each sensor location,
+        selecting the grid cell with values closest to observations.
+        This dataset enables quantitative assessment of model performance and accuracy.
+      table_parquet_path: "data/flood_modelling_products/event_20210805/validation/iot_validation_timeseries.parquet"
+      keywords: ["flood depth", "in-situ measurement", "model validation", "IoT sensor", "point observation", "model-observation comparison", "performance metrics", "25m buffer"]
+      source: "臺北科技大學土木系 D-Flow FM +  CIoT"
+      processing_level: ["驗證", "分析就緒"]
+      coordinate_system: "TWD97 / EPSG:3826"
+      event_id: "flood_event_20210805"
+      event_title: "降雨事件 20210805"
+      event_description: "2021-08-05 鹽水溪流域淹水模擬產品。"
+      thumbnail_variable: "simulated_depth"
+      providers:
+        - name: "臺北科技大學土木系"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"
+
+  # ============================================================
+  # 降雨事件 20210730
+  # ============================================================
+  flood_event_20210730_rainfall_wgs84:
+    driver: intake_xarray.netcdf.NetCDFSource
+    description: "Gridded rainfall data for the 2021-07-30 flood event in WGS84 coordinate system."
+    args:
+      urlpath: "data/flood_modelling_products/event_20210730/forcing/rainfall_wgs84.nc"
+      xarray_kwargs:
+        engine: netcdf4
+      chunks: {}
+    metadata:
+      id: "flood_event_20210730_rainfall_wgs84"
+      collection_name: "降雨事件 20210730 輸入雨量（WGS84）"
+      category: "MODEL"
+      description: |
+        Time-series gridded rainfall data derived from QPESUMS weather radar products.
+        This dataset provides the meteorological forcing input for the flood simulation model.
+      keywords: ["precipitation", "rainfall", "meteorological forcing", "QPESUMS", "radar-derived", "gridded data", "model input"]
+      source: "QPESUMS"
+      processing_level: ["輸入資料", "分析就緒"]
+      coordinate_system: "WGS84"
+      event_id: "flood_event_20210730"
+      event_title: "降雨事件 20210730"
+      event_description: "2021-07-30 鹽水溪流域淹水模擬產品。"
+      thumbnail_variable: "precipitation_observed"
+      providers:
+        - name: "臺北科技大學土木系"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"
+
+  flood_event_20210730_depth_timeseries_zarr:
+    driver: zarr
+    description: "Time-series water depth data from hydrodynamic flood simulation on 1D/2D flexible mesh."
+    args:
+      urlpath: "data/flood_modelling_products/event_20210730/results/fm_map_core.zarr"
+      consolidated: true
+    metadata:
+      id: "flood_event_20210730_depth_timeseries_zarr"
+      collection_name: "降雨事件 20210730 水深時序列（核心 Zarr）"
+      category: "MODEL"
+      description: |
+        Spatially-distributed water depth at each model timestep across the entire computational domain.
+        The dataset includes:
+        - 2D mesh face water depths for overland flooding
+        - 1D mesh node water depths for channel flow
+      keywords: ["flood depth", "water depth", "inundation", "hydrodynamic simulation", "D-Flow FM", "flexible mesh", "1D/2D coupled", "map output", "time series"]
+      source: "D-Flow FM"
+      processing_level: ["模型輸出", "分析就緒"]
+      coordinate_system: "TWD97 / EPSG:3826"
+      event_id: "flood_event_20210730"
+      event_title: "降雨事件 20210730"
+      event_description: "2021-07-30 鹽水溪流域淹水模擬產品。"
+      thumbnail_variable: "Mesh2d_waterdepth"
+      providers:
+        - name: "臺北科技大學土木系"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"
+
+  flood_event_20210730_max_depth_faces:
+    driver: intake_xarray.netcdf.NetCDFSource
+    description: "Maximum flood depth reached during the event at each grid cell."
+    args:
+      urlpath: "data/flood_modelling_products/event_20210730/results/max_depth_faces.nc"
+      xarray_kwargs:
+        engine: netcdf4
+      chunks: {}
+    metadata:
+      id: "flood_event_20210730_max_depth_faces"
+      collection_name: "降雨事件 20210730 網格最大淹水深度"
+      category: "MODEL"
+      description: |
+        Spatial map of the maximum water depth experienced at each location throughout the entire simulation period.
+        This product is useful for flood hazard assessment and identifying areas of greatest inundation risk.
+      keywords: ["flood depth", "maximum inundation", "flood extent", "statistical output", "D-Flow FM", "fourier analysis", "derived product"]
+      source: "D-Flow FM"
+      processing_level: ["模型輸出", "衍生產品"]
+      coordinate_system: "TWD97 / EPSG:3826"
+      event_id: "flood_event_20210730"
+      event_title: "降雨事件 20210730"
+      event_description: "2021-07-30 鹽水溪流域淹水模擬產品。"
+      thumbnail_variable: "max_depth"
+      providers:
+        - name: "臺北科技大學土木系"
+          roles: ["host", "processor"]
+
+  flood_event_20210730_iot_validation_parquet:
+    driver: csv
+    description: "Model validation dataset comparing simulated flood depths with in-situ sensor observations."
+    args:
+      urlpath: "data/flood_modelling_products/event_20210730/validation/iot_validation_timeseries_tidy.csv"
+    metadata:
+      id: "flood_event_20210730_iot_validation_parquet"
+      collection_name: "降雨事件 20210730 淹水感測器驗證時序列"
+      category: "OBSERVATION"
+      description: |
+        Time-series comparison of observed versus simulated flood depths at IoT sensor locations.
+        Model values are extracted from a 5x5 grid (25m buffer) around each sensor location,
+        selecting the grid cell with values closest to observations.
+        This dataset enables quantitative assessment of model performance and accuracy.
+      table_parquet_path: "data/flood_modelling_products/event_20210730/validation/iot_validation_timeseries.parquet"
+      keywords: ["flood depth", "in-situ measurement", "model validation", "IoT sensor", "point observation", "model-observation comparison", "performance metrics", "25m buffer"]
+      source: "臺北科技大學土木系 D-Flow FM +  CIoT"
+      processing_level: ["驗證", "分析就緒"]
+      coordinate_system: "TWD97 / EPSG:3826"
+      event_id: "flood_event_20210730"
+      event_title: "降雨事件 20210730"
+      event_description: "2021-07-30 鹽水溪流域淹水模擬產品。"
+      thumbnail_variable: "simulated_depth"
+      providers:
+        - name: "臺北科技大學土木系"
           roles: ["host", "processor"]
           url: "https://wangup.caece.net/"
