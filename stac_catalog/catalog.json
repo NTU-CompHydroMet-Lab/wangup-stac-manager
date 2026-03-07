@@ -2,44 +2,38 @@
   "type": "Catalog",
   "id": "stac-root-catalog",
   "stac_version": "1.1.0",
-  "description": "The [NTU CompHydroMet Lab](https://wangup.caece.net/) Data Catalog.\n\nSee also:\n- [Lab Website](https://wangup.caece.net/)\n- [GitHub Repository](https://github.com/NTU-CompHydroMet-Lab)\n",
+  "description": "國科會「水環境空間資訊整合與智慧防災應用平台建構計畫」資料目錄。\n\n本計畫聚焦於水環境議題，整合跨部會動靜態時空資料，建立問題導向的跨域整合平台，\n以提升對水環境議題的整體理解和應對能力。示範區域涵蓋台南鹽水溪與高雄布唐布那斯溪流域。\n\n應用場景包含：\n- **降雨即時預測**：基於雷達與衛星觀測之短延時預報\n- **坡地崩塌分級**：整合地貌、區位、地質與動態因子之崩塌潛勢評估\n- **淹水模擬**：中下游都市與流域尺度之水理模擬與驗證\n",
   "links": [
     {
       "rel": "root",
       "href": "./catalog.json",
       "type": "application/json",
-      "title": "NTU CompHydroMet Lab Data Catalog"
+      "title": "水環境空間資訊整合與智慧防災應用平台"
     },
     {
       "rel": "child",
-      "href": "./flood_modelling/catalog.json",
+      "href": "./淹水模擬/catalog.json",
       "type": "application/json",
-      "title": "Flood Modelling"
+      "title": "淹水模擬"
     },
     {
       "rel": "child",
-      "href": "./era5/catalog.json",
+      "href": "./era5_east_asia/collection.json",
       "type": "application/json",
-      "title": "ERA5"
+      "title": "ERA5 大氣再分析（東亞）"
     },
     {
       "rel": "child",
-      "href": "./imerg/catalog.json",
+      "href": "./himawari_clp_2023/collection.json",
       "type": "application/json",
-      "title": "IMERG"
+      "title": "向日葵衛星雲特性（CLP）"
     },
     {
       "rel": "child",
-      "href": "./qpesums/catalog.json",
+      "href": "./QPESUMS_tw/collection.json",
       "type": "application/json",
-      "title": "QPESUMS"
-    },
-    {
-      "rel": "child",
-      "href": "./himawari/catalog.json",
-      "type": "application/json",
-      "title": "HIMAWARI"
+      "title": "QPESUMS 雷達回波（臺灣）"
     }
   ],
-  "title": "NTU CompHydroMet Lab Data Catalog"
+  "title": "水環境空間資訊整合與智慧防災應用平台"
 }

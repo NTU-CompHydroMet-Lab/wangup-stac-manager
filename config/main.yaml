@@ -1,12 +1,16 @@
 project:
-  title: "NTU CompHydroMet Lab Data Catalog"
+  title: "水環境空間資訊整合與智慧防災應用平台"
   id: "stac-root-catalog"
   description: |
-    The [NTU CompHydroMet Lab](https://wangup.caece.net/) Data Catalog.
+    國科會「水環境空間資訊整合與智慧防災應用平台建構計畫」資料目錄。
 
-    See also:
-    - [Lab Website](https://wangup.caece.net/)
-    - [GitHub Repository](https://github.com/NTU-CompHydroMet-Lab)
+    本計畫聚焦於水環境議題，整合跨部會動靜態時空資料，建立問題導向的跨域整合平台，
+    以提升對水環境議題的整體理解和應對能力。示範區域涵蓋台南鹽水溪與高雄布唐布那斯溪流域。
+
+    應用場景包含：
+    - **降雨即時預測**：基於雷達與衛星觀測之短延時預報
+    - **坡地崩塌分級**：整合地貌、區位、地質與動態因子之崩塌潛勢評估
+    - **淹水模擬**：中下游都市與流域尺度之水理模擬與驗證
 
 filesystem:
   output_dir: "stac_catalog"
@@ -33,16 +37,33 @@ build:
       source: "flood_event_20210604_max_depth_faces"
     - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
       source: "flood_event_20210604_iot_validation_parquet"
-    - catalog: "config/catalogs/era5_intake_catalog.yaml"
-      source: "era5_east_asia"
-    - catalog: "config/catalogs/himawari_intake_catalog.yaml"
-      source: "himawri_clp_2023"
-    - catalog: "config/catalogs/imerg_intake_catalog.yaml"
-      source: "imerg_early_v07"
-    - catalog: "config/catalogs/imerg_intake_catalog.yaml"
-      source: "imerg_final_v07"
-    - catalog: "config/catalogs/radar_intake_catalog.yaml"
-      source: "QPESUMS_tw"
+    # --- 以下為本機無資料的 source，僅供伺服器端 build ---
+    # - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
+    #   source: "flood_event_20210805_rainfall_wgs84"
+    # - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
+    #   source: "flood_event_20210805_depth_timeseries_zarr"
+    # - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
+    #   source: "flood_event_20210805_max_depth_faces"
+    # - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
+    #   source: "flood_event_20210805_iot_validation_parquet"
+    # - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
+    #   source: "flood_event_20210730_rainfall_wgs84"
+    # - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
+    #   source: "flood_event_20210730_depth_timeseries_zarr"
+    # - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
+    #   source: "flood_event_20210730_max_depth_faces"
+    # - catalog: "config/catalogs/flood_modelling_intake_catalog.yaml"
+    #   source: "flood_event_20210730_iot_validation_parquet"
+    # - catalog: "config/catalogs/era5_intake_catalog.yaml"
+    #   source: "era5_east_asia"
+    # - catalog: "config/catalogs/himawari_intake_catalog.yaml"
+    #   source: "himawri_clp_2023"
+    # - catalog: "config/catalogs/imerg_intake_catalog.yaml"
+    #   source: "imerg_early_v07"
+    # - catalog: "config/catalogs/imerg_intake_catalog.yaml"
+    #   source: "imerg_final_v07"
+    # - catalog: "config/catalogs/radar_intake_catalog.yaml"
+    #   source: "QPESUMS_tw"
 
 event_aggregation:
   product_aliases:
