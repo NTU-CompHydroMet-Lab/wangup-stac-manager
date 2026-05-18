@@ -33,5 +33,10 @@ build:
       source: "imerg_early_v07"
     - catalog: "config/catalogs/imerg_intake_catalog.yaml"
       source: "imerg_final_v07"
+    - catalog: "config/catalogs/imerg_intake_catalog.yaml"
+      source: "imerg_daily_v07"
+    # TODO: imerg_return_periods requires support for static datasets (no time dimension)
+    # - catalog: "config/catalogs/imerg_intake_catalog.yaml"
+    #   source: "imerg_return_periods"
     - catalog: "config/catalogs/radar_intake_catalog.yaml"
       source: "QPESUMS_tw"

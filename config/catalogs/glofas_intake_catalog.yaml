@@ -1,0 +1,132 @@
+metadata:
+  # ============================================================================
+  # 1. GLOBAL CATALOG METADATA (REQUIRED for Grouping)
+  # ============================================================================
+  catalog_name: "GloFAS"          # Folder name: stac_catalog/glofas/
+  description: "Global Flood Awareness System (GloFAS) - River Discharge Data" # Group Catalog Description
+  
+  # Optional / Search Optimization
+  catalogs_keywords:
+    - "Reanalysis"
+    - "River Discharge"
+    - "Floods"
+    - "ECMWF"
+    - "GloFAS"
+  
+  version: 1
+  license: "Copernicus Emergency Management Service"
+
+sources:
+  # ============================================================================
+  # DATASET: GloFAS DAILY DISCHARGE
+  # ============================================================================
+  glofas_daily:
+    driver: zarr
+    description: "GloFAS Daily River Discharge (Reanalysis)"
+    
+    # --------------------------------------------------------------------------
+    # A. DATA ACCESS (Intake Config)
+    # --------------------------------------------------------------------------
+    args:
+      urlpath: /home/NAS/homes/isaac-10009/Data/_bronze_data/Glofas/Glofas_Daily_zarr/*20*.zarr
+      consolidated: true
+
+    # --------------------------------------------------------------------------
+    # B. STAC METADATA (The "Website" Content)
+    # --------------------------------------------------------------------------
+    metadata:
+      # --- [1] Core Identity (REQUIRED) ---
+      id: "glofas_daily"
+      collection_name: "GloFAS Daily River Discharge"
+      category: "REANALYSIS"
+      
+      # --- [2] Display & UI (RECOMMENDED) ---
+      description: |
+        **Global Flood Awareness System (GloFAS) - Daily River Discharge**
+        
+        GloFAS provides global river discharge estimates from the ECMWF hydrological model, combining weather forecasts with a hydrological model to provide early warning for floods.
+        
+        - **Temporal Resolution**: Daily (24-hour accumulated discharge)
+        - **Spatial Resolution**: 0.05° x 0.05° (~5.5 km)
+        - **Temporal Coverage**: 2000-01-01 to 2025-10-31
+        - **Spatial Coverage**: Global (60°N to 60°S)
+        
+        Ideal for flood forecasting, hydrological analysis, and water resource management.
+      
+      keywords: ["river-discharge", "floods", "GloFAS", "ECMWF", "hydrological-model", "early-warning"]
+      
+      
+      # Thumbnail Generation
+      thumbnail_variable: "dis24"
+      thumbnail_datetime: "2023-09-03T00:00:00"  # Example date
+
+      # --- [3] Scientific Context (OPTIONAL) ---
+      source: "ECMWF (European Centre for Medium-Range Weather Forecasts)"
+      platform: "GloFAS Hydrological Model"
+      processing_level: ["Level 3", "Reanalysis"]
+      coordinate_system: "WGS84"
+      
+      "sci:citation": "Harrigan, S., et al. (2020). GloFAS-ERA5 operational global river discharge reanalysis 1979–present. Earth System Science Data, 12(3), 2043-2060."
+      "sci:doi": "10.5194/essd-12-2043-2020"
+
+      # --- [4] Providers & License (ADMIN) ---
+      providers:
+        - name: "ECMWF"
+          roles: ["producer", "licensor"]
+          url: "https://www.ecmwf.int/"
+        - name: "Copernicus Emergency Management Service"
+          roles: ["licensor"]
+          url: "https://www.globalfloods.eu/"
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"
+
+
+  glofas_return_periods:
+    driver: netcdf
+    description: "GloFAS Extreme River Discharge Return Periods (GEV Analysis)"
+
+    args:
+      urlpath: /home/NAS/homes/isaac-10009/Data/_bronze_data/Glofas/_misc_N_code/Glofas_daily_annual_max_gev_return_periods.nc
+      engine: h5netcdf
+
+    metadata:
+      # --- [1] Core Identity ---
+      id: "glofas_return_periods"
+      collection_name: "GloFAS Extreme River Discharge Return Periods"
+      category: "DERIVED"
+
+      # --- [2] Display & UI ---
+      description: |
+        **GloFAS Extreme River Discharge Return Periods**
+
+        Statistical analysis of extreme river discharge events using Generalized Extreme Value (GEV) distribution. This dataset provides return period estimates derived from GloFAS daily annual maximum discharge data.
+
+        - **Return Periods**: 2, 5, 10, 20, 50, 100, 200, 500, 1000 years
+        - **Spatial Resolution**: 0.05° x 0.05° (~5.5 km)
+        - **Coverage**: Global (60°N-60°S)
+        - **Base Period**: 2000-present
+        - **Units**: m³/s (cubic meters per second)
+
+        Ideal for flood risk assessment, infrastructure design, extreme discharge analysis, and hydrological hazard mapping.
+
+      keywords: ["river-discharge", "extreme-events", "return-period", "GEV", "flood-risk", "statistical-analysis", "GloFAS"]
+
+      thumbnail_variable: "T_100"
+      thumbnail_datetime: null
+
+      # --- [3] Scientific Context ---
+      source: "Derived from ECMWF GloFAS"
+      platform: "GloFAS Hydrological Model"
+      processing_level: ["Level 4", "Derived Product"]
+      coordinate_system: "WGS84"
+
+      "sci:citation": "Derived from Harrigan, S., et al. (2020), GloFAS-ERA5 operational global river discharge reanalysis. Analysis performed using Generalized Extreme Value (GEV) distribution."
+      "sci:doi": null
+
+      # --- [4] Providers ---
+      providers:
+        - name: "NTU CompHydroMet Lab"
+          roles: ["producer", "processor"]
+          url: "https://wangup.caece.net/"
+  

@@ -117,3 +117,110 @@ sources:
         - name: "NASA"
           roles: ["producer"]
           url: "https://gpm.nasa.gov/"
+
+
+  # ============================================================================
+  # DATASET: IMERG Daily
+  # ============================================================================
+  imerg_daily_v07:
+    driver: zarr
+    description: "IMERG v07 Daily (Final Run)"
+
+    args:
+      urlpath: /home/NAS/homes/isaac-10009/Data/_bronze_data/IMERG_v07_Daily/IMERG_v07_Daily_zarr/*.zarr
+      consolidated: true
+
+    metadata:
+      # --- [1] Core Identity ---
+      id: "imerg_daily_v07"
+      collection_name: "GPM IMERG Final Run Daily (V07)"
+      category: "SATELLITE"
+
+      # --- [2] Display & UI ---
+      description: |
+        **Integrated Multi-satellite Retrievals for GPM (IMERG) - Daily Precipitation**
+
+        Daily precipitation estimates from IMERG Final Run product. This dataset provides gauge-calibrated, research-quality precipitation data at daily temporal resolution.
+
+        - **Temporal Resolution**: Daily
+        - **Spatial Resolution**: 0.1° x 0.1° (~11 km)
+        - **Coverage**: January 2000 to present (TRMM/GPM era)
+        - **Latency**: ~3.5 months (gauge-calibrated)
+
+        Ideal for daily precipitation analysis, event studies, and hydrological modeling requiring daily inputs.
+
+      keywords: ["precipitation", "GPM", "daily", "gauge-calibrated", "research-quality"]
+
+      thumbnail_variable: "precipitation"
+      thumbnail_datetime: "2023-09-03T00:00:00" # Typhoon Haikui
+
+      # --- [3] Scientific Context ---
+      source: "NASA GES DISC"
+      platform: "GPM Core Observatory"
+      processing_level: ["Level 3", "Analysis Ready"]
+      coordinate_system: "WGS84"
+
+      "sci:citation": "Huffman, G.J., E.F. Stocker, D.T. Bolvin, E.J. Nelkin, Jackson Tan (2019), GPM IMERG Final Precipitation L3 1 day 0.1 degree x 0.1 degree V07, Greenbelt, MD, Goddard Earth Sciences Data and Information Services Center (GES DISC), Accessed: [Data Access Date], 10.5067/GPM/IMERGDF/DAY/07"
+      "sci:doi": "10.5067/GPM/IMERGDF/DAY/07"
+
+      # --- [4] Providers ---
+      providers:
+        - name: "NASA GES DISC"
+          roles: ["producer", "licensor"]
+          url: "https://disc.gsfc.nasa.gov/"
+        - name: "NTU CompHydroMet Lab"
+          roles: ["host", "processor"]
+          url: "https://wangup.caece.net/"
+
+
+
+  # ============================================================================
+  # DATASET: IMERG Return Periods
+  # ============================================================================
+  imerg_return_periods:
+    driver: netcdf
+    description: "IMERG v07 Extreme Precipitation Return Periods (GEV Analysis)"
+
+    args:
+      urlpath: /home/NAS/homes/isaac-10009/Data/_bronze_data/IMERG_v07_Daily/_misc_N_code/IMERG_v07_daily_annual_max_gev_return_periods.nc
+      engine: h5netcdf
+
+    metadata:
+      # --- [1] Core Identity ---
+      id: "imerg_v07_return_periods"
+      collection_name: "GPM IMERG Extreme Precipitation Return Periods (V07)"
+      category: "DERIVED"
+
+      # --- [2] Display & UI ---
+      description: |
+        **IMERG Extreme Precipitation Return Periods**
+
+        Statistical analysis of extreme precipitation events using Generalized Extreme Value (GEV) distribution. This dataset provides return period estimates derived from IMERG monthly annual maximum precipitation data.
+
+        - **Return Periods**: 2, 5, 10, 20, 50, 100, 200, 500, 1000 years
+        - **Spatial Resolution**: 0.1° x 0.1° (~11 km)
+        - **Coverage**: Global (60°N-60°S)
+        - **Base Period**: 2000-present
+
+        Ideal for flood risk assessment, infrastructure design, and extreme event analysis.
+
+      keywords: ["precipitation", "extreme-events", "return-period", "GEV", "flood-risk", "statistical-analysis"]
+
+      thumbnail_variable: "T_100"
+      thumbnail_datetime: null
+
+      # --- [3] Scientific Context ---
+      source: "Derived from NASA GPM IMERG"
+      platform: "GPM Core Observatory"
+      processing_level: ["Level 4", "Derived Product"]
+      coordinate_system: "WGS84"
+
+      "sci:citation": "Derived from Huffman, G.J., et al. (2019), GPM IMERG Final Precipitation L3 V07. Analysis performed using Generalized Extreme Value (GEV) distribution."
+      "sci:doi": null
+
+      # --- [4] Providers ---
+      providers:
+        - name: "NTU CompHydroMet Lab"
+          roles: ["producer", "processor"]
+          url: "https://wangup.caece.net/"
+  
