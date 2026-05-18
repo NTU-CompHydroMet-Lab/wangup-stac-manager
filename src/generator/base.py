@@ -16,7 +16,7 @@ import pystac
 # Import refactored modules
 from .utils import compute_extent, format_datetime, get_spatial_dims, compute_item_geometry
 from .thumbnails import generate_thumbnail
-from .assets import process_example_notebook, create_data_asset
+from .assets import process_example_notebook, create_data_asset, create_supplemental_asset
 from .model import DatasetMetadata
 
 
@@ -107,6 +107,8 @@ class StacGenerator(abc.ABC):
                     collection.stac_extensions.append(sci_ext_url)
             if key in ["terms_of_use", "gee:terms_of_use"]:
                  extra_fields["terms_of_use"] = value
+            if key in ["event_id", "event_title", "event_description"]:
+                extra_fields[key] = value
         
         if extra_fields:
             collection.extra_fields.update(extra_fields)
@@ -290,10 +292,11 @@ class StacGenerator(abc.ABC):
 
         item = pystac.Item(
             id=item_id,
-            geometry=geometry, 
+            geometry=geometry,
             bbox=bbox,
             datetime=mid_time,
             properties={
+                "title": meta.get("collection_name", item_id),
                 "start_datetime": format_datetime(start),
                 "end_datetime": format_datetime(end),
                 "platform": meta.get("platform", "unknown"),
@@ -322,12 +325,32 @@ class StacGenerator(abc.ABC):
                 title=f"Data Store for {item_id}"
              ))
 
+        # Optional additional sidecar assets declared in metadata.
+        supplemental_assets = meta.get("supplemental_assets", [])
+        if isinstance(supplemental_assets, list):
+            for entry in supplemental_assets:
+                if not isinstance(entry, dict):
+                    continue
+                key = entry.get("key")
+                path = entry.get("path")
+                if not key or not path:
+                    continue
+                asset = create_supplemental_asset(
+                    source_path=str(path),
+                    item_id=item_id,
+                    items_dir=self.items_dir,
+                    asset_key=str(key),
+                    media_type=entry.get("media_type"),
+                    roles=entry.get("roles"),
+                    title=entry.get("title"),
+                )
+                item.add_asset(str(key), asset)
+
         # Add Links (Collection, Root)
         # Using explicit links to match previous behavior for static browsing
         item.add_link(pystac.Link(rel="root", target="../collection.json", media_type="application/json"))
         item.add_link(pystac.Link(rel="collection", target="../collection.json", media_type="application/json"))
         item.add_link(pystac.Link(rel="parent", target="../collection.json", media_type="application/json"))
-        item.add_link(pystac.Link(rel="self", target=f"./{item_id}.json", media_type="application/json"))
 
         item = self._enrich_item_metadata(item, ds_year)
         

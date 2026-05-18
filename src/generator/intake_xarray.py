@@ -12,6 +12,7 @@ from typing import Dict, Any
 
 import intake
 import xarray as xr
+import pandas as pd
 import shutil
 from loguru import logger
 
@@ -125,8 +126,149 @@ class IntakeXarrayGenerator(StacGenerator):
         until we slice it per year. 
         Auto-normalizes coordinates (e.g., 0-360 -> -180/180) to ensure STAC compliance.
         """
-        ds = source.to_dask()
-        return self._normalize_dataset(ds)
+        # Fallback path for parquet-first tabular sources when intake parquet plugin is unavailable.
+        parquet_path = self._extract_parquet_path(source)
+        if parquet_path:
+            try:
+                df = pd.read_parquet(parquet_path)
+                ds = self._tabular_to_xarray(df)
+                ds.encoding["source"] = str(parquet_path)
+                return ds
+            except Exception as e:
+                logger.warning(
+                    f"Failed to read parquet directly ({parquet_path}): {e}. "
+                    "Falling back to Intake source for metadata extraction."
+                )
+
+        try:
+            obj = source.to_dask()
+        except Exception as e:
+            logger.warning(f"source.to_dask() failed ({type(source)}): {e}. Falling back to source.read().")
+            obj = source.read()
+        if isinstance(obj, xr.Dataset):
+            ds = self._normalize_dataset(obj)
+        elif self._is_tabular(obj):
+            ds = self._tabular_to_xarray(obj)
+        else:
+            raise TypeError(f"Unsupported source object type for STAC generation: {type(obj)}")
+
+        source_path = self._extract_source_path(source)
+        # Even if we used fallback table loading, keep parquet as the primary asset if configured.
+        if parquet_path:
+            source_path = str(parquet_path)
+        if source_path:
+            ds.encoding["source"] = str(source_path)
+        return ds
+
+    def _is_tabular(self, obj: Any) -> bool:
+        return hasattr(obj, "columns") and (hasattr(obj, "compute") or hasattr(obj, "to_pandas") or hasattr(obj, "to_dict"))
+
+    def _extract_source_path(self, source: Any) -> str | None:
+        """Best-effort extraction of underlying source filepath from Intake entry."""
+        entry = getattr(source, "_entry", None)
+        if entry is None:
+            return None
+        kwargs = getattr(entry, "_captured_init_kwargs", {}) or {}
+        args = kwargs.get("args", {}) if isinstance(kwargs, dict) else {}
+        urlpath = args.get("urlpath") if isinstance(args, dict) else None
+        if not urlpath:
+            return None
+        path = Path(str(urlpath)).expanduser()
+        if not path.is_absolute():
+            path = path.resolve()
+        return str(path)
+
+    def _extract_parquet_path(self, source: Any) -> Path | None:
+        """Read parquet path from source metadata (`table_parquet_path`) if provided."""
+        entry = getattr(source, "_entry", None)
+        if entry is None:
+            return None
+        meta = getattr(entry, "_metadata", {}) or {}
+        parquet_path = meta.get("table_parquet_path")
+        if not parquet_path:
+            return None
+        path = Path(str(parquet_path)).expanduser()
+        if not path.is_absolute():
+            path = path.resolve()
+        return path
+
+    def _tabular_to_xarray(self, table_obj: Any) -> xr.Dataset:
+        """Convert a tabular source (pandas/dask dataframe) into a 2D time x station Dataset."""
+        if hasattr(table_obj, "compute"):
+            df = table_obj.compute()
+        elif hasattr(table_obj, "to_pandas"):
+            df = table_obj.to_pandas()
+        else:
+            df = pd.DataFrame(table_obj)
+
+        if not isinstance(df, pd.DataFrame):
+            raise TypeError(f"Tabular source is not a DataFrame: {type(df)}")
+
+        time_col = "time_utc" if "time_utc" in df.columns else ("time" if "time" in df.columns else None)
+        station_col = "station_id" if "station_id" in df.columns else ("station" if "station" in df.columns else None)
+        if not time_col or not station_col:
+            raise ValueError("Parquet table must include time/time_utc and station/station_id columns.")
+
+        sim_col = "simulated_depth_m" if "simulated_depth_m" in df.columns else (
+            "simulated_depth" if "simulated_depth" in df.columns else None
+        )
+        obs_col = "observed_depth_m" if "observed_depth_m" in df.columns else (
+            "observed_depth" if "observed_depth" in df.columns else None
+        )
+        if not sim_col and not obs_col:
+            raise ValueError("Parquet table must include at least simulated or observed depth column.")
+
+        work = df.copy()
+        work[time_col] = pd.to_datetime(work[time_col], utc=True, errors="coerce").dt.tz_localize(None)
+        work[station_col] = work[station_col].astype(str)
+        work = work.dropna(subset=[time_col, station_col]).sort_values([time_col, station_col])
+
+        times = pd.Index(sorted(work[time_col].unique()), name="time")
+        stations = pd.Index(sorted(work[station_col].unique()), name="station")
+
+        data_vars: dict[str, tuple[tuple[str, str], Any]] = {}
+        if sim_col:
+            sim = (
+                work.pivot_table(index=time_col, columns=station_col, values=sim_col, aggfunc="first")
+                .reindex(index=times, columns=stations)
+                .astype("float32")
+            )
+            data_vars["simulated_depth"] = (("time", "station"), sim.to_numpy())
+        if obs_col:
+            obs = (
+                work.pivot_table(index=time_col, columns=station_col, values=obs_col, aggfunc="first")
+                .reindex(index=times, columns=stations)
+                .astype("float32")
+            )
+            data_vars["observed_depth"] = (("time", "station"), obs.to_numpy())
+
+        ds = xr.Dataset(data_vars=data_vars, coords={"time": times.to_numpy(), "station": stations.to_numpy()})
+
+        x_col = "station_x" if "station_x" in work.columns else ("x" if "x" in work.columns else None)
+        y_col = "station_y" if "station_y" in work.columns else ("y" if "y" in work.columns else None)
+        if x_col and y_col:
+            st_meta = (
+                work[[station_col, x_col, y_col]]
+                .dropna(subset=[station_col])
+                .drop_duplicates(subset=[station_col])
+                .set_index(station_col)
+                .reindex(stations)
+            )
+            ds["station_x"] = ("station", pd.to_numeric(st_meta[x_col], errors="coerce").to_numpy(dtype="float64"))
+            ds["station_y"] = ("station", pd.to_numeric(st_meta[y_col], errors="coerce").to_numpy(dtype="float64"))
+            ds["station_x"].attrs["units"] = "m"
+            ds["station_y"].attrs["units"] = "m"
+            ds["station_x"].attrs["standard_name"] = "projection_x_coordinate"
+            ds["station_y"].attrs["standard_name"] = "projection_y_coordinate"
+
+        if "crs" in work.columns and work["crs"].notna().any():
+            ds.attrs["crs"] = str(work["crs"].dropna().iloc[0])
+
+        if "simulated_depth" in ds.data_vars:
+            ds["simulated_depth"].attrs["units"] = "m"
+        if "observed_depth" in ds.data_vars:
+            ds["observed_depth"].attrs["units"] = "m"
+        return ds
 
     def _normalize_dataset(self, ds: xr.Dataset) -> xr.Dataset:
         """Normalize coordinates to standard standards (EPSG:4326 -180/180)."""
@@ -153,15 +295,11 @@ class IntakeXarrayGenerator(StacGenerator):
 
     def _enrich_collection_metadata(self, collection: pystac.Collection, ds: xr.Dataset) -> pystac.Collection:
         """Enrich collection metadata using xstac to extract datacube info."""
-        # Removed try-except for debugging
         logger.info(f"ENTER _enrich_collection_metadata for {collection.id}")
-        
         logger.info("Running xstac to extract rich metadata...")
-        
-        # xstac expects the template to be a pystac.Collection
+
         kw = {"reference_system": "EPSG:4326"}
-        
-        # Use cf-xarray to detect dimensions
+
         try:
             if ds.cf["time"].name in ds.dims:
                 kw["temporal_dimension"] = ds.cf["time"].name
@@ -172,10 +310,10 @@ class IntakeXarrayGenerator(StacGenerator):
             if ds.cf["longitude"].name in ds.dims:
                 kw["x_dimension"] = ds.cf["longitude"].name
             elif ds.cf["X"].name in ds.dims:
-                    kw["x_dimension"] = ds.cf["X"].name
+                kw["x_dimension"] = ds.cf["X"].name
         except KeyError:
             pass
-            
+
         try:
             if ds.cf["latitude"].name in ds.dims:
                 kw["y_dimension"] = ds.cf["latitude"].name
@@ -183,13 +321,16 @@ class IntakeXarrayGenerator(StacGenerator):
                 kw["y_dimension"] = ds.cf["Y"].name
         except KeyError:
             pass
-        
+
         logger.debug(f"xstac config: {kw}")
 
-        # xstac returns a NEW collection object enriched with cube extensions
-        enriched = xstac.xarray_to_stac(ds, collection, **kw)
-        
-        return enriched
+        try:
+            return xstac.xarray_to_stac(ds, collection, **kw)
+        except Exception as e:
+            # Some model outputs (e.g., unstructured meshes) don't map cleanly to CF X/Y axes.
+            # We still keep a valid STAC collection and continue generation.
+            logger.warning(f"Collection xstac enrichment failed: {e}")
+            return collection
 
 
     def _enrich_item_metadata(self, item: pystac.Item, ds: xr.Dataset) -> pystac.Item:
