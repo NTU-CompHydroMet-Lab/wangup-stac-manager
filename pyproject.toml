@@ -29,6 +29,12 @@ dependencies = [
     "beartype>=0.22.9",
     "antimeridian>=0.4.5",
     "pyarrow>=23.0.1",
+    "rasterio>=1.4.0",
+    "rio-cogeo>=5.4.0",
+    "pyproj>=3.6.0",
+    "geopandas>=1.0.0",
+    "shapely>=2.0.0",
+    "pyyaml>=6.0",
 ]
 
 [dependency-groups]

@@ -11,6 +11,52 @@ plt.switch_backend('Agg')
 
 import pystac
 
+
+def generate_raster_thumbnail(
+    src_raster: Path,
+    item_id: str,
+    items_dir: Path,
+    cmap: str = "terrain",
+    facecolor: str = "black",
+) -> Optional[Dict[str, object]]:
+    """Render a PNG thumbnail from a single-band GeoTIFF / COG using matplotlib.
+
+    Returns the asset dict (compatible with ``pystac.Asset.from_dict``) or
+    ``None`` on failure.
+    """
+    import numpy as np
+    import rasterio
+
+    try:
+        with rasterio.open(src_raster) as ds:
+            data = ds.read(1).astype(float)
+            nodata = ds.nodata
+
+        if nodata is not None:
+            data = np.ma.masked_equal(data, nodata)
+
+        thumb_name = f"{item_id}_thumb.png"
+        thumb_path = items_dir / thumb_name
+
+        fig, ax = plt.subplots(figsize=(4, 4), dpi=100)
+        ax.imshow(data, cmap=cmap, interpolation="bilinear")
+        ax.set_axis_off()
+        fig.patch.set_facecolor(facecolor)
+        plt.tight_layout(pad=0)
+        fig.savefig(thumb_path, bbox_inches="tight", pad_inches=0, dpi=100, facecolor=facecolor)
+        plt.close(fig)
+        logger.info(f"Raster thumbnail: {thumb_name}")
+
+        return {
+            "href": f"./items/{thumb_name}",
+            "type": "image/png",
+            "roles": ["thumbnail"],
+            "title": f"Thumbnail for {item_id}",
+        }
+    except Exception as e:
+        logger.warning(f"Raster thumbnail generation failed for {src_raster}: {e}")
+        return None
+
 def generate_thumbnail(
     ds: xr.Dataset, 
     item_id: str, 

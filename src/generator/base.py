@@ -5,7 +5,7 @@ import abc
 import json
 import shutil
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 import warnings
 from loguru import logger
 
@@ -21,7 +21,14 @@ from .model import DatasetMetadata
 
 
 class StacGenerator(abc.ABC):
-    """Base class that defines the workflow for generating a static STAC catalog."""
+    """Base class that defines the workflow for generating a static STAC catalog.
+
+    Concrete generators implement source loading and item iteration. Default
+    item iteration assumes an ``xarray.Dataset`` with a ``time`` dimension and
+    emits one item per calendar year, but subclasses are free to override
+    ``_iter_items`` to yield items for non-time-indexed sources (e.g. raster,
+    vector).
+    """
 
     def __init__(self, output_dir: Path) -> None:
         self.output_dir = output_dir
@@ -40,34 +47,61 @@ class StacGenerator(abc.ABC):
     def extract_metadata(self, source: object) -> Dict[str, object]:
         """Extract a dictionary of metadata from the source."""
 
-    @abc.abstractmethod
-    def get_dataset(self, source: object) -> xr.Dataset:
-        """Return an ``xarray.Dataset`` (lazy) for the source."""
+    def get_dataset(self, source: object) -> Optional[xr.Dataset]:
+        """Return an ``xarray.Dataset`` for the source, or ``None`` for non-xarray sources.
 
-    def _enrich_collection_metadata(self, collection: pystac.Collection, ds: xr.Dataset) -> pystac.Collection:
+        xarray-backed subclasses MUST override this and return a real Dataset
+        so that ``_load_or_create_collection`` can compute extents, generate
+        thumbnails, and enrich metadata via xstac. Non-xarray subclasses (raster,
+        vector) can return ``None`` and provide their own ``_compute_extent``
+        / ``_iter_items`` overrides.
+        """
+        return None
+
+    def _enrich_collection_metadata(self, collection: pystac.Collection, ds: Optional[xr.Dataset]) -> pystac.Collection:
         """Hook to enrich collection metadata. Default implementation does nothing."""
         return collection
 
-    def _enrich_item_metadata(self, item: pystac.Item, ds: xr.Dataset) -> pystac.Item:
+    def _enrich_item_metadata(self, item: pystac.Item, ds: Optional[xr.Dataset]) -> pystac.Item:
         """Hook to enrich item metadata. Default implementation does nothing."""
         return item
+
+    def _compute_extent(self, source: object, meta: Dict[str, object], ds: Optional[xr.Dataset]) -> pystac.Extent:
+        """Compute the collection's spatial/temporal extent.
+
+        Default implementation requires an ``xarray.Dataset`` (the original
+        behaviour). Subclasses that work without xarray must override this.
+        """
+        if ds is None:
+            raise NotImplementedError(
+                "Default _compute_extent requires an xarray.Dataset. "
+                "Override _compute_extent in subclasses that don't produce one."
+            )
+        return compute_extent(ds)
 
 
     # ------------------------------------------------------------------
     # Helper methods
     # ------------------------------------------------------------------
-    def _load_or_create_collection(self, meta: Dict[str, object], ds: xr.Dataset) -> pystac.Collection:
+    def _load_or_create_collection(
+        self,
+        meta: Dict[str, object],
+        ds: Optional[xr.Dataset],
+        extent: Optional[pystac.Extent] = None,
+        source: Optional[object] = None,
+    ) -> pystac.Collection:
         """Load an existing collection.json or create a minimal one.
 
         ``meta`` is the metadata dict extracted from the source.
-        ``ds`` is used to compute the real extent.
+        ``ds`` is used to compute the real extent for xarray-based sources.
+        ``extent`` may be pre-computed by subclasses that don't use xarray.
         """
         # Validate metadata using Pydantic
         # This will raise ValidationError if strict fields (id, description) are missing
         meta_obj = DatasetMetadata(**meta)
-        
-        # utils.compute_extent now returns pystac.Extent
-        extent = compute_extent(ds)
+
+        if extent is None:
+            extent = self._compute_extent(source, meta, ds)
         
         # Prepare Providers
         providers = []
@@ -152,20 +186,20 @@ class StacGenerator(abc.ABC):
                     logger.warning(f"Provided thumbnail path not found: {src_thumb}")
             except Exception as e:
                 logger.error(f"Failed to copy provided thumbnail: {e}")
-        if meta_obj.thumbnail_variable:
+        if meta_obj.thumbnail_variable and ds is not None:
             thumb_asset_dict = generate_thumbnail(
-                ds, 
-                collection.id, 
-                self.items_dir, 
+                ds,
+                collection.id,
+                self.items_dir,
                 target_var=meta_obj.thumbnail_variable,
                 target_datetime=meta_obj.thumbnail_datetime
             )
             if thumb_asset_dict:
                  collection.add_asset("thumbnail", pystac.Asset.from_dict(thumb_asset_dict))
 
-        # We pass the Pydantic object back to dict for legacy compatibility if needed, 
-        # or we just let _enrich continue working on the pystac object (which it does).
-        # _enrich_collection_metadata still takes collection (pystac) and ds.
+        # Subclass-specific enrichment (e.g. xstac datacube extension for xarray).
+        # Subclasses that don't produce a Dataset can still extend metadata via
+        # this hook (ds may be None).
         collection = self._enrich_collection_metadata(collection, ds)
         
         # [NEW] Patch cube:dimensions to match unwrapped BBox (if applicable)
@@ -221,7 +255,7 @@ class StacGenerator(abc.ABC):
     # Public entry point
     # ------------------------------------------------------------------
     def generate(self, source_name: str) -> None:
-        """Generate the collection and per‑year items for ``source_name``."""
+        """Generate the collection and items for ``source_name``."""
         source = self.load_source(source_name)
         meta = self.extract_metadata(source)
         ds = self.get_dataset(source)
@@ -231,39 +265,69 @@ class StacGenerator(abc.ABC):
             logger.info(f"Cleaning existing items: {self.items_dir}")
             shutil.rmtree(self.items_dir)
         self.items_dir.mkdir(parents=True, exist_ok=True)
-            
+
         if self.collection_path.exists():
             self.collection_path.unlink()
-        
+
         # Ensure Collection ID
         if "id" not in meta:
             meta["id"] = source_name
-            
-        collection = self._load_or_create_collection(meta, ds)
 
-        # We manually manage the lists of links for the static catalog structure
-        # PySTAC can help, but for now let's just ensure the objects are valid.
-        
+        collection = self._load_or_create_collection(meta, ds, source=source)
+
         # Write collection immediately so items can validate against it
         self._write_collection(collection)
 
+        for item in self._iter_items(source, meta, ds, collection):
+            link = pystac.Link(
+                rel="item",
+                target=f"./items/{item.id}.json",
+                media_type="application/json",
+            )
+            collection.add_link(link)
+            self._write_item(item)
+            logger.info(f"Generated Item: {item.id}")
+
+        self._finalize_collection(collection, source, meta, ds)
+        self._write_collection(collection)
+        logger.info(f"Collection written to {self.collection_path}")
+
+    def _finalize_collection(
+        self,
+        collection: pystac.Collection,
+        source: object,
+        meta: Dict[str, object],
+        ds: Optional[xr.Dataset],
+    ) -> None:
+        """Hook called after all items are written, before the final collection write.
+
+        Subclasses can attach collection-level assets here (e.g. thumbnails
+        derived from items produced during iteration).
+        """
+        return None
+
+    def _iter_items(
+        self,
+        source: object,
+        meta: Dict[str, object],
+        ds: Optional[xr.Dataset],
+        collection: Optional[pystac.Collection] = None,
+    ) -> Iterable[pystac.Item]:
+        """Yield STAC items for the source.
+
+        Default implementation: per-year split of an xarray Dataset's time
+        dimension (legacy IntakeXarray behaviour). Subclasses that don't
+        produce a time-indexed Dataset must override this.
+        """
+        if ds is None:
+            raise NotImplementedError(
+                "Default _iter_items requires an xarray.Dataset. "
+                "Override _iter_items in subclasses that don't produce one."
+            )
         years = sorted(set(pd.DatetimeIndex(ds.time.values).year))
         for yr in years:
             ds_year = ds.sel(time=str(yr))
-            item = self._make_item(ds_year, yr, meta)
-            
-            link = pystac.Link(
-                rel="item", 
-                target=f"./items/{item.id}.json", 
-                media_type="application/json"
-            )
-            collection.add_link(link)
-            
-            self._write_item(item)
-            logger.info(f"Generated Item for year {yr}")
-
-        self._write_collection(collection)
-        logger.info(f"Collection written to {self.collection_path}")
+            yield self._make_item(ds_year, yr, meta)
 
     # ------------------------------------------------------------------
     # Item creation
